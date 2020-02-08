@@ -1,0 +1,204 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# clasifierrr
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of clasifierrr is to ...
+
+## Installation
+
+``` r
+remotes::install_github("jspaezp/clasifierrr")
+```
+
+## Workflow
+
+1. Externally create the masking files for the classification
+1. Internally create a parameters data frame
+1. use `build_train_multi` to create the training dataset
+1. use `ranger` to train the classifier
+1. use `classify_img` to classify as many images as you want
+1. (optional) use `filter_masks` to remove objects that are too small or too big
+
+## Example
+
+```{r}
+library(clasifierrr)
+library(EBImage)
+library(ranger)
+## basic example code
+## 
+## 
+params_df <- tibble::tibble(
+    file = c(
+        system.file(
+            "extdata", "4T1-shNT-1_layer1.png",
+            package = "clasifierrr"),
+        system.file(
+            "extdata", "4T1-shNT-1_layer2.png",
+            package = "clasifierrr")),
+    classif = c("spheroid", "bg"),
+    related_file = system.file(
+        "extdata", "4T1-shNT-1.png",
+        package = "clasifierrr")
+)
+
+params_df
+```
+
+### Form of the classifier files
+
+It has to be a file of the same size of the related image, where it is all black
+except for the desired classifier section.
+
+Several classifications can be used.
+
+I personally use gimp to generate those, just open the image you want to 
+classify, draw on a new layer, disable the main layer and export to a png.
+
+```{r}
+display(readImageBw(system.file(
+            "extdata", "4T1-shNT-1_layer1.png",
+            package = "clasifierrr")), method = "raster")
+
+display(readImageBw(system.file(
+            "extdata", "4T1-shNT-1_layer2.png",
+            package = "clasifierrr")), method = "raster")
+
+base_image <- readImageBw(system.file(
+            "extdata", "4T1-shNT-1.png",
+            package = "clasifierrr"))
+display(base_image, method = "raster")
+```
+
+
+The classifier is based on the concept of features, which is applying several
+filters to the image to detect edges and calculate the consistency with the
+neighborhood.
+
+you can use as many filters as you want but
+THE FILTER WIDTHS HAVE TO BE ODD NUMBERS, also consider that the more filters,
+the more memmory you will need.
+
+```{r}
+
+features <- calc_features(base_image, filter_widths = c(3,5))
+head(features)
+```
+
+
+Each of the columns can be made to an image
+
+```{r}
+for (i in names(features)) {
+    reconstructed_image <- Image(features[[i]], dim(base_image))
+    display(reconstructed_image, method = "raster")
+    title(main = list(i, col = "yellow"))
+}
+```
+
+
+
+```{r}
+trainset <- build_train_multi(params_df)
+head(trainset)
+```
+
+
+
+
+```{r}
+classifier <- ranger(
+    pixel_class ~ .,
+    data = trainset, 
+    num.trees = 100, 
+    importance = "impurity")
+classifier
+```
+
+If the classifier was trained using `importance = "impurity"`, you can ask it
+to give you the relative importance of the variables used.
+
+```{r}
+sort(ranger::importance(classifier), decreasing = TRUE)
+```
+
+### Using the classifier on an image
+
+Can be used directly on calculated features ...
+
+```{r}
+test_img <- readImageBw(system.file(
+        "extdata", "4T1-shNT-1.png",
+        package = "clasifierrr"))
+
+test_feat <- calc_features(test_img)
+class_img <- classify_img(
+    classifier, 
+    feature_frame = test_feat, 
+    dims = dim(test_img))
+display(class_img, method = "raster")
+```
+
+It can also be used on a raw image ...
+
+```{r}
+class_img <- classify_img(classifier, img = test_img)
+display(class_img, method = "raster")
+```
+
+And as well in a system file
+
+```{r}
+class_img <- classify_img(classifier, path = system.file(
+        "extdata", "4T1-shNT-1.png",
+        package = "clasifierrr"))
+display(class_img, method = "raster")
+```
+
+### Cleaning the final image
+
+The final image can be cleaned manually or using `filter_masks`,
+which can remove stuff either too big or small.
+
+As a reminder, white regions are considered objects, so if your object is black,
+try running something like `img <- 1- img`
+
+```{r}
+display(dilate(class_img, makeBrush(3, "disc")), method = "raster")
+```
+
+```{r}
+display(colorLabels(bwlabel(class_img)), method = "raster")
+```
+
+
+```{r}
+filt_class_img <- filter_masks(class_img, min_radius = 30, max_radius = 1000)
+
+display(
+    filt_class_img,
+    method = "raster")
+
+display(colorLabels(bwlabel(filt_class_img)), method = "raster")
+
+table(filt_class_img)
+
+filt_class_img
+```
+
