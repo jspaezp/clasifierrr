@@ -32,4 +32,3 @@ feature_df <- calc_features(base_image, filter_widths = c(3, 15, 31))
 display_filters(feature_df, dims = dim(base_image))
 ```
 
-

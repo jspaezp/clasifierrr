@@ -1,6 +1,3 @@
-# Hello, world!
-#
-# This is an example function named 'hello'
 
 calc_sobel_kern <- function(width) {
     part <- c(seq(from = 1, to = (width + 1)/2, by = 1),
@@ -33,6 +30,19 @@ sobel_filter <- function(img, width = 3, sobel_kern = NULL) {
 
     ret <- sqrt( magx^2 + magy^2 )
     return(ret)
+}
+
+
+variance_filter <- function(img, width){
+    sum_kernel <- EBImage::makeBrush(width, "disc")
+    mean_kernell <- sum_kernel/sum(sum_kernel)
+
+    mean_img <- EBImage::filter2(img, mean_kernell, boundary = "replicate")
+    squares <- (mean_img - img)^2
+
+
+    variance <- EBImage::filter2(squares, sum_kernel, boundary = "replicate")
+    return(variance)
 }
 
 
@@ -95,10 +105,6 @@ filter_masks <- function(mask, min_radius, max_radius) {
     return(mask)
 }
 
-
-#generate_filters <- function(img, filter_list) {
-#
-#}
 
 #' Read 2d images
 #'
@@ -171,6 +177,9 @@ calc_features <- function(img, filter_widths = c(3,5,11,23)){
 
     names_g_diff <- paste0("gauss_diff_", filter_widths[-length(g_filtered)])
 
+    v_filt <- purrr::map(filter_widths, ~ variance_filter(img, .x))
+    names_v_filt <- paste0("var_filt_", filter_widths)
+
     # position <- list(
     #     y_position = EBImage::Image(
     #         (seq_along(img) %/% ncol(img))/nrow(img),
@@ -185,12 +194,13 @@ calc_features <- function(img, filter_widths = c(3,5,11,23)){
     #     (position$x_position - (max(position$x_position)/2))^2)
 
     bound_flat <- purrr::map_dfc(
-        c(s_filtered, g_filtered, g_diff),
+        c(s_filtered, g_filtered, g_diff, v_filt),
         ~ as.numeric(.x))
     # Still considering if scale should be used on the former line
     names(bound_flat) <- c(names_s_filtered,
                            names_g_filtered,
-                           names_g_diff)
+                           names_g_diff,
+                           names_v_filt)
 
     time_taken <- Sys.time() - start_time
 
