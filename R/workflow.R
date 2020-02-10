@@ -156,6 +156,7 @@ calc_features <- function(img, filter_widths = c(3,5,11,23)){
 
     message("Filters of size: ", paste0(filter_widths, collapse = ","))
 
+    # TODO reimplement this as function factory
     s_filtered <- purrr::map(
         filter_widths,
         ~ sobel_filter(img, width = .x))
@@ -426,7 +427,14 @@ classify_img <- function(classifier, path = NULL, img = NULL,
         "to predict the image"))
 
     if (!is.null(class_highlight)) {
-        pred_mat <- as.numeric(pred_mat == class_highlight)
+        if (class_highlight %in% pred_mat) {
+            warning(
+                class_highlight,
+                " was not found in the predicted matrix",
+                " will just attempt to convert to a numeric")
+        } else {
+            pred_mat <- as.numeric(pred_mat == class_highlight)
+        }
     } else {
         pred_mat <- as.numeric(pred_mat)
     }
@@ -436,6 +444,11 @@ classify_img <- function(classifier, path = NULL, img = NULL,
 
 predict_img <- function(x, ...) {
     UseMethod("predict_img")
+}
+
+predict_img.glm <- function(x, feature_frame) {
+    prediction <- predict(x, feature_frame, type = "response")
+    return(prediction)
 }
 
 predict_img.ranger <- function(x, feature_frame) {

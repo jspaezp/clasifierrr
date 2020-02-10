@@ -41,9 +41,44 @@ params_df <- tibble::tibble(
 params_df
 ```
 
+
+```{r}
+test_img <- readImageBw(system.file(
+        "extdata", "4T1-shNT-1.png",
+        package = "clasifierrr"))
+
+test_feat <- calc_features(test_img, filter_widths = c(3, 5, 15))
+```
+
+
 ```{r}
 trainset <- build_train_multi(params_df, filter_widths = c(3, 5, 15))
 head(trainset)
+```
+
+The general pattern is that you need to train a model that accepts the `predict`
+method, in this case we will use a simple logistic regression.
+
+```{r}
+trainset2 <- trainset
+
+# Logistic regressions need binary outputs
+trainset2$pixel_class <- trainset2$pixel_class == "spheroid"
+
+model_simple_glm <- glm(
+  pixel_class~.,
+  data = trainset2,
+  family = binomial(link = "logit"))
+model_simple_glm
+```
+
+```{r}
+class_img <- classify_img(
+      classifier = model_simple_glm, 
+      feature_frame = test_feat, 
+      dims = dim(test_img))
+
+display(class_img, method = "raster")
 ```
 
 
@@ -77,14 +112,6 @@ model_glmnet <- train(
   trControl = ctrl)
 ```
 
-
-```{r}
-test_img <- readImageBw(system.file(
-        "extdata", "4T1-shNT-1.png",
-        package = "clasifierrr"))
-
-test_feat <- calc_features(test_img, filter_widths = c(3, 5, 15))
-```
 
 
 ```{r}

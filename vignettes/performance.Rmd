@@ -217,7 +217,7 @@ train_params_grid$oob_error <- purrr::map_dbl(forests, ~ .x$prediction.error)
 
 these are just the series of plots I would do to ceck which one works better...
 
-```{r}
+```{r fig.height=3, fig.width=5}
 require(ggplot2)
 
 ggplot(train_params_grid,
