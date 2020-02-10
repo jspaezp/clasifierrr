@@ -217,7 +217,7 @@ train_params_grid$oob_error <- purrr::map_dbl(forests, ~ .x$prediction.error)
 
 these are just the series of plots I would do to ceck which one works better...
 
-```{r fig.height=3, fig.width=5}
+```{r fig.height=5, fig.width=8}
 require(ggplot2)
 
 ggplot(train_params_grid,
@@ -233,8 +233,9 @@ ggplot(train_params_grid,
     theme_bw()
 ```
 
+Now lets take a look at the prediction times ...
 
-```{r}
+```{r fig.height=5, fig.width=8}
 img <- preprocess_img(readImageBw(params_df$related_file[[1]]))
 dims_use <- dim(img)
 feats <- calc_features(img, filter_widths = c(3,7,15))
@@ -245,7 +246,7 @@ my_class_fun <- function(classifier) {
             feature_frame = feats,
             classifier = classifier, 
             dims = dims_use,
-            class_highlight = "_sphere") 
+            class_highlight = "sphere") 
     })
     
     return(list(class_img, tt))
@@ -257,7 +258,7 @@ suppressMessages({
 
 ```
 
-```{r}
+```{r fig.height=5, fig.width=8}
 train_params_grid$predict_time <- purrr::map_dbl(class_results, ~.x[[2]][[3]])
 
 ggplot(train_params_grid,
@@ -278,8 +279,7 @@ ggplot(train_params_grid,
 ```
 
 
-```{r}
-
+```{r fig.height=5, fig.width=8}
 ggplot(train_params_grid,
        aes(y = oob_error, x = predict_time, colour = factor(num.trees))) +
     geom_point() + 

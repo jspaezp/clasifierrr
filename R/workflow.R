@@ -427,11 +427,11 @@ classify_img <- function(classifier, path = NULL, img = NULL,
         "to predict the image"))
 
     if (!is.null(class_highlight)) {
-        if (class_highlight %in% pred_mat) {
+        if (any(class_highlight %in% pred_mat)) {
             warning(
                 class_highlight,
                 " was not found in the predicted matrix",
-                " will just attempt to convert to a numeric")
+                " will just attempt to convert to a numeric\n")
         } else {
             pred_mat <- as.numeric(pred_mat == class_highlight)
         }
