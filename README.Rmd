@@ -114,7 +114,7 @@ for (i in names(features)) {
 
 
 ```{r}
-trainset <- build_train_multi(params_df)
+trainset <- build_train_multi(params_df, filter_widths = c(3,5))
 head(trainset)
 ```
 
@@ -160,7 +160,7 @@ display(class_img, method = "raster")
 It can also be used on a raw image ...
 
 ```{r}
-class_img <- classify_img(classifier, img = test_img)
+class_img <- classify_img(classifier, img = test_img, filter_widths = c(3,5))
 display(class_img, method = "raster")
 ```
 
