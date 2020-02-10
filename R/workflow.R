@@ -160,14 +160,14 @@ calc_features <- function(img, filter_widths = c(3,5,11,23)){
         filter_widths,
         ~ EBImage::filter2(
             img,
-            EBImage::makeBrush(size = .x, "gaussian"),
+            EBImage::makeBrush(size = .x, "gaussian", sigma = (.x + 1)/6),
             boundary='replicate'))
 
     names_g_filtered <- paste0("gauss_filt_", filter_widths)
 
     g_diff <- purrr::map(
         seq_along(g_filtered)[-1],
-        ~ as.numeric(g_filtered[[.x]]) - as.numeric(g_filtered[[.x -1]]))
+        ~ 2*(as.numeric(g_filtered[[.x]]) - as.numeric(g_filtered[[.x -1]])))
 
     names_g_diff <- paste0("gauss_diff_", filter_widths[-length(g_filtered)])
 
