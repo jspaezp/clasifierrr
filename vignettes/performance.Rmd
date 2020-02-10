@@ -1,0 +1,294 @@
+---
+title: "performance"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{performance}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(clasifierrr)
+library(EBImage)
+```
+
+We will start with the same files as the ones in the readme
+
+```{r}
+params_df <- tibble::tibble(
+    file = c(
+        system.file(
+            "extdata", "4T1-shNT-1_layer1.png",
+            package = "clasifierrr"),
+        system.file(
+            "extdata", "4T1-shNT-1_layer2.png",
+            package = "clasifierrr")),
+    classif = c("spheroid", "bg"),
+    related_file = system.file(
+        "extdata", "4T1-shNT-1.png",
+        package = "clasifierrr")
+)
+
+params_df
+```
+
+```{r}
+base_image <- readImageBw(system.file(
+            "extdata", "4T1-shNT-1.png",
+            package = "clasifierrr"))
+display(base_image, method = "raster")
+```
+
+
+```{r}
+time_taken_full <- system.time({
+    features <- calc_features(
+        base_image, 
+        filter_widths = c(3,7,15))
+})
+
+time_taken_full
+object.size(features)
+```
+
+we can notice that it takes `r time_taken_full[[3]]` 
+seconds to achieve the calculation and the `features`
+object ocupies 
+`r format(object.size(features), units = "Mb")`.
+
+Nonetheless, since we basically are doing one calculation
+per pixels, per filter, decreasing the number of pixels would
+decrease the number of calculation by that number. 
+And therefore, decreasing the size will accelerate the speed
+with the square of that reduction (since its a 2d image)
+
+```{r}
+newsize <- as.integer(ncol(base_image)/2)
+shrunk_image <- resize(base_image, w = newsize)
+
+time_taken_shrunk <- system.time({
+    shrunk_features <- calc_features(
+        shrunk_image, 
+        filter_widths = c(3,7,15))
+})
+
+time_taken_shrunk
+object.size(shrunk_features)
+```
+
+
+we can notice that now it takes `r time_taken_shrunk[[3]]` 
+seconds to achieve the calculation and the `shrunk_features`
+object ocupies 
+`r format(object.size(shrunk_features), units = "Mb")`.
+
+which is a `r time_taken_full[[3]]/time_taken_shrunk[[3]]`
+fold decrease in time and 
+`r object.size(features)/object.size(shrunk_features)`
+decrease in used memmory
+
+lets take a look at the actual filters ...
+
+
+```{r}
+
+image_shrunk_list <- purrr::map(names(features), ~ Image(shrunk_features[[.x]], dim(shrunk_image)))
+image_full_list <- purrr::map(names(features), ~ Image(features[[.x]], dim(base_image)))
+
+display(combine(image_shrunk_list), method = "raster", all = TRUE)
+display(combine(image_full_list), method = "raster", all = TRUE)
+```
+
+Note how, since the filter sizes are still the same,
+but the image size is different, the filters have slightly
+different effects.
+
+now ... I have implemented a way to make this automatic
+for the multiple case set.
+
+For that you need to write a function that does the 
+processing you want and pass it as an argument to 
+`preprocess_fun_img` and `preprocess_fun_mask`
+
+```{r}
+half_image <- function(x) {
+    newsize <- as.integer(ncol(x)/2)
+    shrunk_image <- resize(x, w = newsize)
+    return(shrunk_image)
+}
+```
+
+
+```{r}
+multi_time_full <- system.time({
+    trainset <- build_train_multi(
+        params_df, 
+        train_size_each = 5000)
+})
+
+multi_time_shrunk <- system.time({
+    trainset <- build_train_multi(
+        params_df, 
+        preprocess_fun_img = half_image,
+        preprocess_fun_mask = half_image, 
+        train_size_each = 5000)
+})
+
+multi_time_full
+multi_time_shrunk
+head(trainset)
+```
+
+In this case it would be a increase in `r multi_time_full[[3]]/multi_time_shrunk[[3]]` 
+times of computation.
+
+
+Preprocessing functions can be much more complicated ...
+
+
+```{r}
+preprocess_img <- function(x) {
+    x <- correct_light(x, chunk_width = 11)
+    x <- half_image(x)
+    x <- x - min(min(x), 0)
+    x <- x/max(x)
+    return(x)
+}
+
+preprocessed_image <- preprocess_img(base_image)
+display(base_image, method = "raster")
+display(preprocessed_image, method = "raster")
+```
+
+
+```{r}
+multi_time_shrunk <- system.time({
+    trainset_preproc <- build_train_multi(
+        params_df, 
+        preprocess_fun_img = preprocess_img,
+        preprocess_fun_mask = half_image, 
+        train_size_each = 5000)
+})
+```
+
+
+## Prediction performance
+
+```{r}
+library(ranger)
+train_params_grid <- as.data.frame(expand.grid(
+    num.trees = c(50, 100, 200), 
+    min.node.size = c(1, 5, 20, 50),
+    max.depth = c(0, 5, 10, 50, 200)))
+
+# Since we are good scientists we will run it in triplicate ...
+train_params_grid <- rbind(train_params_grid,train_params_grid,train_params_grid)
+
+small_trainset <- trainset[sample(1:nrow(trainset), 5000),]
+
+forests <- purrr::pmap(
+    train_params_grid, 
+    function(num.trees, min.node.size, max.depth) {
+        ranger(
+            pixel_class ~ .,
+            data = small_trainset, 
+            num.trees = num.trees, 
+            importance = "impurity",
+            min.node.size = min.node.size,
+            max.depth = max.depth)})
+
+train_params_grid$oob_error <- purrr::map_dbl(forests, ~ .x$prediction.error) 
+
+```
+
+```{r}
+require(ggplot2)
+
+ggplot(train_params_grid,
+       aes(y = oob_error, x = num.trees, 
+           colour = factor(min.node.size))) +
+    geom_point() + 
+    facet_wrap(~ max.depth, labeller = label_both) + 
+    geom_point(
+        data = train_params_grid[,-3],
+        alpha = 0.1, colour = "#666666",
+        aes(y = oob_error, x = num.trees),
+        inherit.aes = FALSE) +
+    theme_bw()
+```
+
+```{r}
+
+```
+
+
+```{r}
+img <- preprocess_img(readImageBw(params_df$related_file[[1]]))
+dims_use <- dim(img)
+feats <- calc_features(img)
+
+my_class_fun <- function(classifier) {
+    tt <- system.time({
+        class_img <- classify_img(
+            feature_frame = feats,
+            classifier = classifier, 
+            dims = dims_use,
+            class_highlight = "_sphere") 
+    })
+    
+    return(list(class_img, tt))
+}
+
+suppressMessages({
+    class_results <- purrr::map(forests, my_class_fun)
+})
+
+```
+
+```{r}
+train_params_grid$predict_time <- purrr::map_dbl(class_results, ~.x[[2]][[3]])
+
+
+ggplot(train_params_grid,
+       aes(y = predict_time, x = num.trees, 
+           colour = factor(min.node.size),
+           group = interaction(min.node.size, num.trees))) +
+    geom_boxplot() + 
+    facet_wrap(~ max.depth, labeller = label_both) +
+    theme_bw()
+
+ggplot(train_params_grid,
+       aes(y = predict_time, x = factor(min.node.size), 
+           colour = factor(max.depth),
+           group = interaction(min.node.size, max.depth))) +
+    geom_boxplot() + 
+    theme_bw()
+
+```
+
+
+```{r}
+
+ggplot(train_params_grid,
+       aes(y = oob_error, x = predict_time, colour = factor(num.trees))) +
+    geom_point() + 
+    theme_bw()
+
+ggplot(train_params_grid,
+       aes(y = oob_error, x = predict_time, colour = factor(min.node.size))) +
+    geom_point() + 
+    theme_bw()
+
+ggplot(train_params_grid,
+       aes(y = oob_error, x = predict_time, colour = factor(max.depth))) +
+    geom_point() + 
+    theme_bw()
+```
+

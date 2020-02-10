@@ -7,7 +7,8 @@
 calc_features(img, filter_widths = c(3, 5, 11, 23))
 }
 \arguments{
-\item{filter_widths}{}
+\item{filter_widths}{a numeric vector of odd numbers to be used as the
+width of the feature filters}
 }
 \value{
 data.frame

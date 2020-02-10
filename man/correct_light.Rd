@@ -4,7 +4,7 @@
 \alias{correct_light}
 \title{Title}
 \usage{
-correct_light(img, chunk_width)
+correct_light(img, chunk_width = 200)
 }
 \arguments{
 \item{chunk_width}{}

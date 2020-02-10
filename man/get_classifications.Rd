@@ -4,10 +4,12 @@
 \alias{get_classifications}
 \title{Title}
 \usage{
-get_classifications(imgs_df)
+get_classifications(imgs_df, preprocess_fun_mask = NULL)
 }
 \arguments{
 \item{imgs_df}{data frame with 3 columns, file, classif and related_file}
+
+\item{preprocess_fun_mask}{optional preprocessing function to be used on the images}
 }
 \value{
 

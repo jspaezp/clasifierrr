@@ -1,18 +1,6 @@
 # Hello, world!
 #
 # This is an example function named 'hello'
-# which prints 'Hello, world!'.
-#
-# You can learn more about package authoring with RStudio at:
-#
-#   http://r-pkgs.had.co.nz/
-#
-# Some useful keyboard shortcuts for package authoring:
-#
-#   Install Package:           'Ctrl + Shift + B'
-#   Check Package:             'Ctrl + Shift + E'
-#   Test Package:              'Ctrl + Shift + T'
-
 
 calc_sobel_kern <- function(width) {
     part <- c(seq(from = 1, to = (width + 1)/2, by = 1),
@@ -33,8 +21,15 @@ sobel_filter <- function(img, width = 3, sobel_kern = NULL) {
         sobel_kern <- calc_sobel_kern(width)
     }
 
-    magx <- EBImage::filter2(img, sobel_kern$x)
-    magy <- EBImage::filter2(img, sobel_kern$y)
+    magx <- EBImage::filter2(
+        img,
+        sobel_kern$x,
+        boundary = 'replicate')
+
+    magy <- EBImage::filter2(
+        img,
+        sobel_kern$y,
+        boundary = 'replicate')
 
     ret <- sqrt( magx^2 + magy^2 )
     return(ret)
@@ -53,9 +48,11 @@ sobel_filter <- function(img, width = 3, sobel_kern = NULL) {
 #'
 #' @importFrom EBImage makeBrush filter2 Grayscale
 #' @importFrom reshape2 melt
-correct_light <- function(img, chunk_width) {
-    tmp_brush <- EBImage::makeBrush(151, "disc")
-    light_approx <- EBImage::filter2(img, tmp_brush/sum(tmp_brush))
+correct_light <- function(img, chunk_width = 200) {
+    tmp_brush <- EBImage::makeBrush(chunk_width, "disc")
+    light_approx <- EBImage::filter2(
+        img, tmp_brush/sum(tmp_brush),
+        boundary = "replicate")
 
     lm_data <- reshape2::melt(as.matrix(light_approx))
 
@@ -68,7 +65,7 @@ correct_light <- function(img, chunk_width) {
         reshape2::acast(pred_lm, Var1 ~ Var2),
         colormode = EBImage::Grayscale)
     img <- img - light
-    img[img < 0] <- 0
+    # img[img < 0] <- 0
     return(img)
 }
 
@@ -120,7 +117,7 @@ readImageBw <- function(path){
     img <- EBImage::readImage(
         path)
 
-    if (length(dim(img)) == 3){
+    if (length(dim(img)) == 3) {
         img <- EBImage::Image(
             apply(img, c(1,2), sum)/(dim(img)[3]),
             colormode = EBImage::Grayscale)
@@ -137,7 +134,8 @@ readImageBw <- function(path){
 #' difference of gaussians, adds as well the position in the image
 #'
 #' @param img
-#' @param filter_widths
+#' @param filter_widths a numeric vector of odd numbers to be used as the
+#'     width of the feature filters
 #'
 #' @return data.frame
 #' @export
@@ -146,6 +144,12 @@ readImageBw <- function(path){
 #' @importFrom purrr map map_dfc
 #' @importFrom EBImage Image makeBrush filter2
 calc_features <- function(img, filter_widths = c(3,5,11,23)){
+    start_time <- Sys.time()
+    message("Starting to calculate features for image of width ", ncol(img),
+            " and height ", nrow(img))
+
+    message("Filters of size: ", paste0(filter_widths, collapse = ","))
+
     s_filtered <- purrr::map(
         filter_widths,
         ~ sobel_filter(img, width = .x))
@@ -154,34 +158,53 @@ calc_features <- function(img, filter_widths = c(3,5,11,23)){
 
     g_filtered <- purrr::map(
         filter_widths,
-        ~ EBImage::filter2(img, EBImage::makeBrush(size = .x, "gaussian")))
+        ~ EBImage::filter2(
+            img,
+            EBImage::makeBrush(size = .x, "gaussian"),
+            boundary='replicate'))
 
     names_g_filtered <- paste0("gauss_filt_", filter_widths)
 
-    g_diff <- purrr::map2(
-        seq_along(g_filtered)[-1], seq_along(g_filtered)[-length(g_filtered)],
-        ~ g_filtered[[.x]] - g_filtered[[.y]])
+    g_diff <- purrr::map(
+        seq_along(g_filtered)[-1],
+        ~ as.numeric(g_filtered[[.x]]) - as.numeric(g_filtered[[.x -1]]))
 
     names_g_diff <- paste0("gauss_diff_", filter_widths[-length(g_filtered)])
 
-    position <- list(
-        y_position = EBImage::Image(
-            (seq_along(img) %/% ncol(img))/nrow(img),
-            dim = dim(img)),
-        x_position = EBImage::Image(
-            (seq_along(img) %% nrow(img))/ncol(img),
-            dim = dim(img)))
+    # position <- list(
+    #     y_position = EBImage::Image(
+    #         (seq_along(img) %/% ncol(img))/nrow(img),
+    #         dim = dim(img)),
+    #     x_position = EBImage::Image(
+    #         (seq_along(img) %% nrow(img))/ncol(img),
+    #         dim = dim(img)))
+
+
+    # position$center_distance <- sqrt(
+    #     (position$y_position - (max(position$y_position)/2))^2 +
+    #     (position$x_position - (max(position$x_position)/2))^2)
 
     bound_flat <- purrr::map_dfc(
-        c(s_filtered, g_filtered, g_diff, position),
-        as.numeric)
-    names(bound_flat) <- c(names_s_filtered, names_g_filtered,
-                           names_g_diff, names(position))
+        c(s_filtered, g_filtered, g_diff),
+        ~ as.numeric(.x))
+    # Still considering if scale should be used on the former line
+    names(bound_flat) <- c(names_s_filtered,
+                           names_g_filtered,
+                           names_g_diff)
+
+    time_taken <- Sys.time() - start_time
+
+    message("Took ", as.numeric(time_taken),
+            " ", attr(time_taken, "units"),
+            " to calculate the features")
+
     return(bound_flat)
 }
 
 
-get_class <- function(file, classif, ...) {
+get_class <- function(file, classif,
+                      preprocess_fun_mask = NULL,
+                      ...) {
     # > foo <- get_class("raw_data/4T1-shNT-1_layer1.png", "class1")
     # > str(foo)
     # List of 4
@@ -190,9 +213,13 @@ get_class <- function(file, classif, ...) {
     # $ pixels: int [1:108470] 83463 83464 83465 83466 83467 84485 84486 84487 84488 84489 ...
     # $ dims  : int [1:2] 1024 768
     img <- readImageBw(file)
+
+    if (!is.null(preprocess_fun_mask)) {
+        img <- preprocess_fun_mask(img)
+    }
     pix_class <- which(img != 0)
 
-    print(paste(
+    message(paste(
         "Returning for file: ", file,
         "and classification", classif,
         "a total of", length(pix_class),
@@ -211,6 +238,7 @@ get_class <- function(file, classif, ...) {
 #' imgs shouls be a data frame of files and classifications and related images
 #'
 #' @param imgs_df data frame with 3 columns, file, classif and related_file
+#' @param preprocess_fun_mask optional preprocessing function to be used on the images
 #'
 #' @return
 #' @export
@@ -221,16 +249,13 @@ get_class <- function(file, classif, ...) {
 #'   classif = c("class1", "class2"),
 #'   related_file = "image1.png"
 #' )
-get_classifications <- function(imgs_df) {
-    #
-    # data.frame(
-    #   file = c("image1_class1.png", "image1_class2.png"),
-    #   classif = c("class1", "class2"),
-    #   related_file = "image1.png"
-    # )
-
+get_classifications <- function(imgs_df,
+                                preprocess_fun_mask = NULL) {
     # Dims for matrices are c(nrow(img), ncol(img))
-    classes <- purrr::pmap(imgs_df, get_class)
+    classes <- purrr::pmap(
+        imgs_df,
+        get_class,
+        preprocess_fun_mask = preprocess_fun_mask)
 
     # This generates a lisf of n(number of files)
     split_classes <- split(classes, imgs_df$related_file)
@@ -254,21 +279,64 @@ build_train <- function(feat_img, pixel_classes, train_size = 50000) {
     bound_flat <- as.data.frame(feat_img)
     bound_flat$pixel_class <- pixel_classes
 
-    train_pixels <- sample(which(bound_flat$pixel_class != ""), size = train_size)
+    valid_pixels <- which(bound_flat$pixel_class != "")
+
+    if (train_size > length(valid_pixels)) {
+        warning(
+            "The selected train size(",
+            train_size, ") is larger than the number of classified ",
+            "pixels (", length(valid_pixels),
+            ") ", " so the number is getting updated to the total ",
+            "number of available pixels")
+        train_size <- length(valid_pixels)
+    }
+
+    train_pixels <- sample(valid_pixels, size = train_size)
     train_data <- bound_flat[train_pixels,]
     return(train_data)
 }
 
-build_train_multi <- function(imgs_df, train_size_each = 50000) {
-    classes_list <- get_classifications(imgs_df)
+build_train_multi <- function(imgs_df,
+                              train_size_each = 50000,
+                              preprocess_fun_img = NULL,
+                              preprocess_fun_mask = NULL,
+                              filter_widths = c(3, 5, 15, 31)) {
+
+    if (is.null(preprocess_fun_mask)) {
+        preprocess_fun_mask = (function(x){x})
+    }
+
+    if (is.null(preprocess_fun_img)) {
+        preprocess_fun_img = (function(x){x})
+    }
+
+    classes_list <- get_classifications(
+        imgs_df,
+        preprocess_fun_mask = preprocess_fun_mask)
 
     trainset <- purrr::map2_df(
         names(classes_list), classes_list,
-        ~ build_train(calc_features(readImageBw(.x)), .y, train_size_each)
+        ~ build_train(
+          feat_img = calc_features(
+              preprocess_fun_img(readImageBw(.x)),
+              filter_widths = filter_widths),
+          pixel_classes = .y,
+          train_size = train_size_each)
     )
 
-    print(table(trainset$pixel_class))
-    print(dim(trainset))
+    tbl <- table(trainset$pixel_class)
+    message(
+        "Classified objects are of classes",
+        paste(
+            names(tbl),
+            as.numeric(tbl),
+            sep = ": ",
+            collapse = " and "))
+    message(
+        "Returning a data frame of ",
+        nrow(trainset),
+        " rows and ", ncol(trainset),
+        " columns")
     return(trainset)
 
 }
@@ -293,32 +361,44 @@ test_build_train_multi <- function() {
 
 
 
-#' Title
+#' Classify Images
 #'
-#' @param classifier
-#' @param path
-#' @param img
-#' @param feature_frame
-#' @param class_highlight classifier to show as white
-#' @param dims
+#' @param classifier an object returned from ranger to use as a classifier
+#' @param path the path of the image to  classify
+#' @param img an EBImage image
+#' @param feature_frame a data frame with the calculated features
+#' @param filter_widths filters widths to use when calculating features
+#' @param class_highlight classifier to show as white in the final mask
+#' @param dims dimensions of the images to classify, only required if using the feature_frmae interface
+#'
+#' This classifier by default will fall back to file, trying in order of
+#' priority a `feature_frame` > `img` > `path`, please note that since the
+#' `feature_frame` does not contain the dimensions of the image, it has to be
+#' provided in the `dims` argument in addition.
 #'
 #' @return
 #' @export
 #'
 #' @examples
-classify_img <- function(classifier, path = NULL, img = NULL, feature_frame = NULL,
+classify_img <- function(classifier, path = NULL, img = NULL,
+                         feature_frame = NULL, filter_widths = NULL,
                          class_highlight = unique(classifier$predictions)[[1]],
-                         dims = NULL){
+                         dims = NULL, preprocess_fun_img = NULL){
 
     if (is.null(img) & is.null(feature_frame)) {
-        message("Attempting to read image from file")
+        message("Attempting to read image from file", path)
         img <- readImageBw(path)
+        if (!is.null(preprocess_fun_img)) {
+            message("Applying image preprocessing")
+            img <- preprocess_fun_img(img)
+        }
         dims <- dim(img)
     }
 
     if (is.null(feature_frame)) {
         message("Attempting to calculate features")
-        feature_frame <- calc_features(img)
+        stopifnot(!is.null(filter_widths))
+        feature_frame <- calc_features(img, filter_widths = filter_widths)
         dims <- dim(img)
     }
 
@@ -326,7 +406,7 @@ classify_img <- function(classifier, path = NULL, img = NULL, feature_frame = NU
 
     message("Starting classification")
     start_time <- Sys.time()
-    prediction <- predict(classifier, feature_frame)
+    prediction <- ranger:::predict.ranger(classifier, data = feature_frame)
     time_taken <- Sys.time() - start_time
 
     message(
@@ -338,4 +418,30 @@ classify_img <- function(classifier, path = NULL, img = NULL, feature_frame = NU
 
     out_img <- EBImage::Image(as.numeric(pred_mat == class_highlight), dim = dims)
     return(out_img)
+}
+
+
+#' Displays the data from a feature frame
+#'
+#' @param feature_df
+#' @param dims
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' myfile <- system.file("extdata", "4T1-shNT-1.png", package = "clasifierrr")
+#' myimg <- readImageBw(myfile)
+#' myfeat <- calc_features(myimg, c(3,5))
+#' display_filters(myfeat, dim(myimg))
+display_filters <- function(feature_df, dims) {
+    image_full_list <- purrr::map(
+        names(feature_df),
+        ~ Image(feature_df[[.x]], dims))
+    comb_img <- EBImage::combine(image_full_list)
+    EBImage::display(
+        comb_img,
+        method = "raster",
+        all = TRUE)
+    return(invisible(comb_img))
 }

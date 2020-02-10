@@ -96,7 +96,6 @@ THE FILTER WIDTHS HAVE TO BE ODD NUMBERS, also consider that the more filters,
 the more memmory you will need.
 
 ```{r}
-
 features <- calc_features(base_image, filter_widths = c(3,5))
 head(features)
 ```
@@ -123,12 +122,16 @@ head(trainset)
 
 
 ```{r}
+
 classifier <- ranger(
     pixel_class ~ .,
     data = trainset, 
     num.trees = 100, 
-    importance = "impurity")
+    importance = "impurity", 
+    min.node.size = 5, 
+    max.depth = 200)
 classifier
+
 ```
 
 If the classifier was trained using `importance = "impurity"`, you can ask it
