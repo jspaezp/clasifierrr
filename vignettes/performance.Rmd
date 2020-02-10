@@ -130,7 +130,8 @@ half_image <- function(x) {
 multi_time_full <- system.time({
     trainset <- build_train_multi(
         params_df, 
-        train_size_each = 5000)
+        train_size_each = 5000, 
+        filter_widths = c(3,7,15))
 })
 
 multi_time_shrunk <- system.time({
@@ -138,7 +139,8 @@ multi_time_shrunk <- system.time({
         params_df, 
         preprocess_fun_img = half_image,
         preprocess_fun_mask = half_image, 
-        train_size_each = 5000)
+        train_size_each = 5000, 
+        filter_widths = c(3,7,15))
 })
 
 multi_time_full
@@ -174,12 +176,17 @@ multi_time_shrunk <- system.time({
         params_df, 
         preprocess_fun_img = preprocess_img,
         preprocess_fun_mask = half_image, 
-        train_size_each = 5000)
+        train_size_each = 5000, 
+        filter_widths = c(3,7,15))
 })
 ```
 
 
 ## Prediction performance
+
+Well ... a semi-good measure of prediction accuracy is the out of bag prediction
+error (OOB for short) and it is posible to modulate several parameters that can
+impact that.
 
 ```{r}
 library(ranger)
@@ -208,6 +215,8 @@ train_params_grid$oob_error <- purrr::map_dbl(forests, ~ .x$prediction.error)
 
 ```
 
+these are just the series of plots I would do to ceck which one works better...
+
 ```{r}
 require(ggplot2)
 
@@ -224,15 +233,11 @@ ggplot(train_params_grid,
     theme_bw()
 ```
 
-```{r}
-
-```
-
 
 ```{r}
 img <- preprocess_img(readImageBw(params_df$related_file[[1]]))
 dims_use <- dim(img)
-feats <- calc_features(img)
+feats <- calc_features(img, filter_widths = c(3,7,15))
 
 my_class_fun <- function(classifier) {
     tt <- system.time({
@@ -254,7 +259,6 @@ suppressMessages({
 
 ```{r}
 train_params_grid$predict_time <- purrr::map_dbl(class_results, ~.x[[2]][[3]])
-
 
 ggplot(train_params_grid,
        aes(y = predict_time, x = num.trees, 

@@ -122,7 +122,6 @@ head(trainset)
 
 
 ```{r}
-
 classifier <- ranger(
     pixel_class ~ .,
     data = trainset, 

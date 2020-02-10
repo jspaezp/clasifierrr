@@ -392,7 +392,7 @@ test_build_train_multi <- function() {
 #' @examples
 classify_img <- function(classifier, path = NULL, img = NULL,
                          feature_frame = NULL, filter_widths = NULL,
-                         class_highlight = unique(classifier$predictions)[[1]],
+                         class_highlight = NULL,
                          dims = NULL, preprocess_fun_img = NULL){
 
     if (is.null(img) & is.null(feature_frame)) {
@@ -416,7 +416,7 @@ classify_img <- function(classifier, path = NULL, img = NULL,
 
     message("Starting classification")
     start_time <- Sys.time()
-    prediction <- ranger:::predict.ranger(classifier, data = feature_frame)
+    pred_mat <- predict_img(classifier, feature_frame)
     time_taken <- Sys.time() - start_time
 
     message(
@@ -424,10 +424,39 @@ classify_img <- function(classifier, path = NULL, img = NULL,
         format(as.numeric(time_taken), digits = 4),
         attr(time_taken, "units"),
         "to predict the image"))
-    pred_mat <- prediction$predictions
 
-    out_img <- EBImage::Image(as.numeric(pred_mat == class_highlight), dim = dims)
+    if (!is.null(class_highlight)) {
+        pred_mat <- as.numeric(pred_mat == class_highlight)
+    } else {
+        pred_mat <- as.numeric(pred_mat)
+    }
+    out_img <- EBImage::Image(pred_mat, dim = dims)
     return(out_img)
+}
+
+predict_img <- function(x, ...) {
+    UseMethod("predict_img")
+}
+
+predict_img.ranger <- function(x, feature_frame) {
+    prediction <- ranger:::predict.ranger(x, data = feature_frame)
+    pred_mat <- prediction$predictions
+    return(pred_mat)
+}
+
+predict_img.ksvm <- function(x, feature_frame) {
+    prediction <- kernlab::predict(x, feature_frame)
+    return(prediction)
+}
+
+
+predict_img.default <- function(x, feature_frame) {
+    prediction <- predict(x, feature_frame)
+    return(prediction)
+}
+
+predict_img.glmnet <- function(x, feature_frame) {
+    predict_img.default(x, as.matrix(feature_frame))
 }
 
 

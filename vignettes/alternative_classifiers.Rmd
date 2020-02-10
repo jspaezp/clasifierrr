@@ -1,0 +1,120 @@
+---
+title: "alternative_classifiers"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{alternative_classifiers}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(clasifierrr)
+library(clasifierrr)
+library(EBImage)
+library(ranger)
+library(caret)
+library(kernlab)
+```
+
+```{r}
+params_df <- tibble::tibble(
+    file = c(
+        system.file(
+            "extdata", "4T1-shNT-1_layer1.png",
+            package = "clasifierrr"),
+        system.file(
+            "extdata", "4T1-shNT-1_layer2.png",
+            package = "clasifierrr")),
+    classif = c("spheroid", "bg"),
+    related_file = system.file(
+        "extdata", "4T1-shNT-1.png",
+        package = "clasifierrr")
+)
+
+params_df
+```
+
+```{r}
+trainset <- build_train_multi(params_df, filter_widths = c(3, 5, 15))
+head(trainset)
+```
+
+
+```{r}
+ctrl <- trainControl(method = "cv", number = 2)
+model_svmlinear <- train(
+  pixel_class~.,
+  data = trainset,
+  method = "svmLinear",
+  trControl = ctrl)
+model_svmlinear
+```
+
+```{r}
+model_svmradial <- train(
+  pixel_class~.,
+  data = trainset,
+  method = "svmRadial",
+  trControl = ctrl)
+
+model_glm <- train(
+  pixel_class~.,
+  data = trainset,
+  method = "glm",
+  trControl = ctrl)
+
+model_glmnet <- train(
+  pixel_class~.,
+  data = trainset,
+  method = "glmnet",
+  trControl = ctrl)
+```
+
+
+```{r}
+test_img <- readImageBw(system.file(
+        "extdata", "4T1-shNT-1.png",
+        package = "clasifierrr"))
+
+test_feat <- calc_features(test_img, filter_widths = c(3, 5, 15))
+```
+
+
+```{r}
+for (classifier in list(model_svmlinear, model_svmradial,
+                        model_glm)) {
+  timetaken <- system.time({
+    class_img <- classify_img(
+      classifier$finalModel, 
+      feature_frame = test_feat, 
+      dims = dim(test_img))
+
+  })
+  if (length(unique(as.numeric(class_img))) < 20 & 
+      colorMode(class_img) == Grayscale) {
+    class_img <- colorLabels(class_img)
+  }
+  display(class_img, method = "raster")
+}
+```
+
+```{r}
+class_img <- EBImage::Image(
+  predict(model_glmnet$finalModel, 
+          s = model_glmnet$bestTune$lambda, 
+          as.matrix(test_feat), 
+          type = "response"),
+  dim = dim(test_img)
+
+)
+display(class_img, method = "raster")
+
+```
+

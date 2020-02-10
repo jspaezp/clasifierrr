@@ -10,7 +10,7 @@ classify_img(
   img = NULL,
   feature_frame = NULL,
   filter_widths = NULL,
-  class_highlight = unique(classifier$predictions)[[1]],
+  class_highlight = NULL,
   dims = NULL,
   preprocess_fun_img = NULL
 )

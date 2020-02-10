@@ -26,9 +26,18 @@ base_image <- readImageBw(system.file(
 display(base_image, method = "raster")
 ```
 
+The features are just a series of filters applied to the main image.
+So it converts an image of heigh y and length x into a data frame of `x * y`
+number of rows and one column per feature.
 
 ```{r}
 feature_df <- calc_features(base_image, filter_widths = c(3, 15, 31))
+head(feature_df)
+```
+
+you can see the features that were calculated by using the following function
+
+```{r}
 display_filters(feature_df, dims = dim(base_image))
 ```
 
