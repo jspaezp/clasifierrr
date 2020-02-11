@@ -1,52 +1,6 @@
 
-calc_sobel_kern <- function(width) {
-    part <- c(seq(from = 1, to = (width + 1)/2, by = 1),
-              seq(from = (width - 1)/2, to = 1, by = -1))
 
-    m <- matrix(c(
-        -part, rep(rep(0, length(part)), width -2),
-        part),
-        ncol = width,
-        byrow = TRUE)
-
-    return(list(y = m, x = t(m)))
-}
-
-
-sobel_filter <- function(img, width = 3, sobel_kern = NULL) {
-    if (is.null(sobel_kern)) {
-        sobel_kern <- calc_sobel_kern(width)
-    }
-
-    magx <- EBImage::filter2(
-        img,
-        sobel_kern$x,
-        boundary = 'replicate')
-
-    magy <- EBImage::filter2(
-        img,
-        sobel_kern$y,
-        boundary = 'replicate')
-
-    ret <- sqrt( magx^2 + magy^2 )
-    return(ret)
-}
-
-
-variance_filter <- function(img, width){
-    sum_kernel <- EBImage::makeBrush(width, "disc")
-    mean_kernell <- sum_kernel/sum(sum_kernel)
-
-    mean_img <- EBImage::filter2(img, mean_kernell, boundary = "replicate")
-    squares <- (mean_img - img)^2
-
-
-    variance <- EBImage::filter2(squares, sum_kernel, boundary = "replicate")
-    return(variance)
-}
-
-
-#' Title
+#' Corrects uniform changes in light
 #'
 #' @param img
 #' @param chunk_width
@@ -132,85 +86,6 @@ readImageBw <- function(path){
     return(img)
 }
 
-
-
-#' Calculate filter features
-#'
-#' Calculates features for each pixel based on sobel filters, gaussian and
-#' difference of gaussians, adds as well the position in the image
-#'
-#' @param img
-#' @param filter_widths a numeric vector of odd numbers to be used as the
-#'     width of the feature filters
-#'
-#' @return data.frame
-#' @export
-#'
-#' @examples
-#' @importFrom purrr map map_dfc
-#' @importFrom EBImage Image makeBrush filter2
-calc_features <- function(img, filter_widths = c(3,5,11,23)){
-    start_time <- Sys.time()
-    message("Starting to calculate features for image of width ", ncol(img),
-            " and height ", nrow(img))
-
-    message("Filters of size: ", paste0(filter_widths, collapse = ","))
-
-    # TODO reimplement this as function factory
-    s_filtered <- purrr::map(
-        filter_widths,
-        ~ sobel_filter(img, width = .x))
-
-    names_s_filtered <- paste0("sobel_filt_", filter_widths)
-
-    g_filtered <- purrr::map(
-        filter_widths,
-        ~ EBImage::filter2(
-            img,
-            EBImage::makeBrush(size = .x, "gaussian", sigma = (.x + 1)/6),
-            boundary='replicate'))
-
-    names_g_filtered <- paste0("gauss_filt_", filter_widths)
-
-    g_diff <- purrr::map(
-        seq_along(g_filtered)[-1],
-        ~ 2*(as.numeric(g_filtered[[.x]]) - as.numeric(g_filtered[[.x -1]])))
-
-    names_g_diff <- paste0("gauss_diff_", filter_widths[-length(g_filtered)])
-
-    v_filt <- purrr::map(filter_widths, ~ variance_filter(img, .x))
-    names_v_filt <- paste0("var_filt_", filter_widths)
-
-    # position <- list(
-    #     y_position = EBImage::Image(
-    #         (seq_along(img) %/% ncol(img))/nrow(img),
-    #         dim = dim(img)),
-    #     x_position = EBImage::Image(
-    #         (seq_along(img) %% nrow(img))/ncol(img),
-    #         dim = dim(img)))
-
-
-    # position$center_distance <- sqrt(
-    #     (position$y_position - (max(position$y_position)/2))^2 +
-    #     (position$x_position - (max(position$x_position)/2))^2)
-
-    bound_flat <- purrr::map_dfc(
-        c(s_filtered, g_filtered, g_diff, v_filt),
-        ~ as.numeric(.x))
-    # Still considering if scale should be used on the former line
-    names(bound_flat) <- c(names_s_filtered,
-                           names_g_filtered,
-                           names_g_diff,
-                           names_v_filt)
-
-    time_taken <- Sys.time() - start_time
-
-    message("Took ", as.numeric(time_taken),
-            " ", attr(time_taken, "units"),
-            " to calculate the features")
-
-    return(bound_flat)
-}
 
 
 get_class <- function(file, classif,
@@ -489,7 +364,7 @@ predict_img.glmnet <- function(x, feature_frame) {
 display_filters <- function(feature_df, dims) {
     image_full_list <- purrr::map(
         names(feature_df),
-        ~ Image(feature_df[[.x]], dims))
+        ~ EBImage::Image(feature_df[[.x]], dims))
     comb_img <- EBImage::combine(image_full_list)
     EBImage::display(
         comb_img,
