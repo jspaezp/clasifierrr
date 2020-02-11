@@ -1,26 +1,25 @@
-test_that("multiplication works", {
-  expect_success({
+test_that("filter calculation with template works", {
+  base_image <- readImageBw(system.file(
+              "extdata", "tiny_4T1-shNT-1.png",
+              package = "clasifierrr"))
+  features <- calc_features(base_image, filter_widths = c(3,5))
+  expect_gt(length(dim(features)), 1)
+})
 
-      img_file <- system.file(
-          "extdata", "raw_data/4T1-shNT-1",
-          package = "classifierrr")
-      img <- EBImage::readImage(
-          "./raw_data/4T1-shNT-1.png")
-      img <- Image(apply(img, c(1,2), sum)/3, colormode = Grayscale)
-      display(img)
-      c_img <- correct_light(img)
-
-      otsu_img <- c_img > otsu(c_img) + 0.01
-      otsu_img <- bwlabel(otsu_img)
-      dilate_otsu <- dilate(otsu_img, makeBrush(51, "disc"))
-      fill_otsu <- fillHull(dilate_otsu)
-      display((fill_otsu))
-      filtered_dilat_otsu <- filter_masks(fill_otsu, 50, 2000)
-      display(filtered_dilat_otsu)
-      c_img2 <- c_img
-      c_img2[filtered_dilat_otsu == 0] <- 0
-      display(c_img)
-      display(c_img2 > otsu(c_img2))
-
-  })
+test_that("muti image feature calculation works", {
+  params_df <- tibble::tibble(
+      file = c(
+          system.file(
+              "extdata", "tiny_4T1-shNT-1_layer1.png",
+              package = "clasifierrr"),
+          system.file(
+              "extdata", "tiny_4T1-shNT-1_layer2.png",
+              package = "clasifierrr")),
+      classif = c("spheroid", "bg"),
+      related_file = system.file(
+          "extdata", "tiny_4T1-shNT-1.png",
+          package = "clasifierrr")
+  )
+  trainset <- build_train_multi(params_df, filter_widths = c(3,5))
+  expect_gt(length(dim(trainset)), 1)
 })

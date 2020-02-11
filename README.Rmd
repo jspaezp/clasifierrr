@@ -47,14 +47,14 @@ library(ranger)
 params_df <- tibble::tibble(
     file = c(
         system.file(
-            "extdata", "4T1-shNT-1_layer1.png",
+            "extdata", "tiny_4T1-shNT-1_layer1.png",
             package = "clasifierrr"),
         system.file(
-            "extdata", "4T1-shNT-1_layer2.png",
+            "extdata", "tiny_4T1-shNT-1_layer2.png",
             package = "clasifierrr")),
     classif = c("spheroid", "bg"),
     related_file = system.file(
-        "extdata", "4T1-shNT-1.png",
+        "extdata", "tiny_4T1-shNT-1.png",
         package = "clasifierrr")
 )
 
@@ -73,15 +73,15 @@ classify, draw on a new layer, disable the main layer and export to a png.
 
 ```{r}
 display(readImageBw(system.file(
-            "extdata", "4T1-shNT-1_layer1.png",
+            "extdata", "tiny_4T1-shNT-1_layer1.png",
             package = "clasifierrr")), method = "raster")
 
 display(readImageBw(system.file(
-            "extdata", "4T1-shNT-1_layer2.png",
+            "extdata", "tiny_4T1-shNT-1_layer2.png",
             package = "clasifierrr")), method = "raster")
 
 base_image <- readImageBw(system.file(
-            "extdata", "4T1-shNT-1.png",
+            "extdata", "tiny_4T1-shNT-1.png",
             package = "clasifierrr"))
 display(base_image, method = "raster")
 ```
@@ -97,7 +97,7 @@ the more memmory you will need.
 
 ```{r}
 features <- calc_features(base_image, filter_widths = c(3,5))
-head(features)
+head(features, 2)
 ```
 
 
@@ -117,8 +117,6 @@ for (i in names(features)) {
 trainset <- build_train_multi(params_df, filter_widths = c(3,5))
 head(trainset)
 ```
-
-
 
 
 ```{r}
@@ -146,30 +144,40 @@ Can be used directly on calculated features ...
 
 ```{r}
 test_img <- readImageBw(system.file(
-        "extdata", "4T1-shNT-1.png",
+        "extdata", "tiny_4T1-shNT-1.png",
         package = "clasifierrr"))
 
-test_feat <- calc_features(test_img)
+test_feat <- calc_features(test_img, filter_widths = c(3,5))
+
 class_img <- classify_img(
     classifier, 
     feature_frame = test_feat, 
-    dims = dim(test_img))
+    dims = dim(test_img), 
+    class_highlight = "spheroid")
 display(class_img, method = "raster")
 ```
 
 It can also be used on a raw image ...
 
 ```{r}
-class_img <- classify_img(classifier, img = test_img, filter_widths = c(3,5))
-display(class_img, method = "raster")
+class_img <- classify_img(
+  classifier, 
+  img = test_img, 
+  filter_widths = c(3,5))
+display(colorLabels(class_img), method = "raster")
 ```
 
 And as well in a system file
 
 ```{r}
-class_img <- classify_img(classifier, path = system.file(
-        "extdata", "4T1-shNT-1.png",
-        package = "clasifierrr"))
+class_img <- classify_img(
+  classifier,
+  path = system.file(
+    "extdata", "tiny_4T1-shNT-1.png",
+    package = "clasifierrr"),
+  filter_widths = c(3,5), 
+  class_highlight = "spheroid")
+
 display(class_img, method = "raster")
 ```
 

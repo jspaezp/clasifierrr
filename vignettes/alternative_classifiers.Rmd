@@ -27,14 +27,14 @@ library(kernlab)
 params_df <- tibble::tibble(
     file = c(
         system.file(
-            "extdata", "4T1-shNT-1_layer1.png",
+            "extdata", "tiny_4T1-shNT-1_layer1.png",
             package = "clasifierrr"),
         system.file(
-            "extdata", "4T1-shNT-1_layer2.png",
+            "extdata", "tiny_4T1-shNT-1_layer2.png",
             package = "clasifierrr")),
     classif = c("spheroid", "bg"),
     related_file = system.file(
-        "extdata", "4T1-shNT-1.png",
+        "extdata", "tiny_4T1-shNT-1.png",
         package = "clasifierrr")
 )
 
@@ -43,9 +43,7 @@ params_df
 
 
 ```{r}
-test_img <- readImageBw(system.file(
-        "extdata", "4T1-shNT-1.png",
-        package = "clasifierrr"))
+test_img <- readImageBw(params_df$related_file[[1]])
 
 test_feat <- calc_features(test_img, filter_widths = c(3, 5, 15))
 ```

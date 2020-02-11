@@ -14,7 +14,8 @@ Imports:
     EBImage,
     purrr,
     tibble,
-    reshape2
+    reshape2,
+    furrr
 Suggests: 
     testthat (>= 2.1.0),
     knitr,
