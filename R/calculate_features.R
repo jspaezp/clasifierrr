@@ -18,9 +18,9 @@
 calc_features <- function(img, filter_widths = c(3,5,11,23), verbose = FALSE){
     start_time <- Sys.time()
     message("Starting to calculate features for image of width ", ncol(img),
-            " and height ", nrow(img))
+            " and height ", nrow(img), "\n")
 
-    message("Filters of size: ", paste0(filter_widths, collapse = ","))
+    message("Filters of size: {", paste0(filter_widths, collapse = ","), "}\n")
 
     filter_widths <- sort(filter_widths)
     # TODO reimplement this as function factory

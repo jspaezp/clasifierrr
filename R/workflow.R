@@ -107,9 +107,9 @@ get_class <- function(file, classif,
 
     message(paste(
         "Returning for file: ", file,
-        "and classification", classif,
-        "a total of", length(pix_class),
-        "positive pixels"))
+        "and classification\"", classif,
+        "\" a total of {", length(pix_class),
+        "} positive pixels"))
     return(list(
         class = classif,
         file = file,
@@ -173,7 +173,7 @@ build_train <- function(feat_img, pixel_classes, train_size = 50000) {
             train_size, ") is larger than the number of classified ",
             "pixels (", length(valid_pixels),
             ") ", " so the number is getting updated to the total ",
-            "number of available pixels")
+            "number of available pixels\n")
         train_size <- length(valid_pixels)
     }
 
@@ -301,17 +301,46 @@ classify_img <- function(classifier, path = NULL, img = NULL,
         attr(time_taken, "units"),
         "to predict the image"))
 
-    if (!is.null(class_highlight)) {
-        if (any(class_highlight %in% pred_mat)) {
-            warning(
-                class_highlight,
-                " was not found in the predicted matrix",
-                " will just attempt to convert to a numeric\n")
-        } else {
+    classifier_discrete <- inherits(
+        pred_mat,
+        c("factor", "character"))
+
+
+    if (classifier_discrete) {
+        unique_vals <- unique(pred_mat)
+        if (length(unique_vals) != 2) {
+            warning("The classification had {", length(unique_vals),
+                    "} distinct values as an output, ",
+                    "make sure that is what you want")
+        }
+
+        if (!is.null(class_highlight)) {
+            if (!class_highlight %in% unique_vals) {
+                warning(
+                    "{", class_highlight, "}",
+                    " was not found in the predicted matrix",
+                    " will just use the first one found {",
+                    unique(pred_mat)[[1]],
+                    "}\n")
+                class_highlight <- unique(pred_mat)[[1]]
+            }
             pred_mat <- as.numeric(pred_mat == class_highlight)
         }
     } else {
-        pred_mat <- as.numeric(pred_mat)
+        if (!is.null(class_highlight)) {
+            warning("The output classifier is not discrete so",
+                    " the provided 'class_highlight' variable {",
+                    class_highlight, "} will be dissregarded\n")
+        }
+    }
+
+    pred_mat <- as.numeric(pred_mat)
+    if (max(pred_mat) > 1 | min(pred_mat) < 0) {
+        warning("Found in the final classification {",
+                sum(pred_mat > 1), "} values more than 1 and {",
+                sum(pred_mat < 0), "} values less than 0, ",
+                "This might be undesired in the final image and lead",
+                " to inconsistencies\n")
     }
     out_img <- EBImage::Image(pred_mat, dim = dims)
     return(out_img)
