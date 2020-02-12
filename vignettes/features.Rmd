@@ -37,7 +37,7 @@ head(feature_df)
 
 you can see the features that were calculated by using the following function
 
-```{r}
+```{r fig.height=12, fig.width=12}
 display_filters(feature_df, dims = dim(base_image))
 ```
 
