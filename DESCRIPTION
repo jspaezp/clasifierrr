@@ -15,7 +15,8 @@ Imports:
     purrr,
     tibble,
     reshape2,
-    furrr
+    furrr,
+    fftwtools
 Suggests: 
     testthat (>= 2.1.0),
     knitr,
