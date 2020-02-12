@@ -51,7 +51,7 @@ test_feat <- calc_features(test_img, filter_widths = c(3, 5, 15))
 
 ```{r}
 trainset <- build_train_multi(params_df, filter_widths = c(3, 5, 15))
-head(trainset)
+head(trainset, 2)
 ```
 
 The general pattern is that you need to train a model that accepts the `predict`
@@ -63,11 +63,14 @@ trainset2 <- trainset
 # Logistic regressions need binary outputs
 trainset2$pixel_class <- trainset2$pixel_class == "spheroid"
 
-model_simple_glm <- glm(
-  pixel_class~.,
-  data = trainset2,
-  family = binomial(link = "logit"))
-model_simple_glm
+suppressWarnings({
+  model_simple_glm <- glm(
+    pixel_class~.,
+    data = trainset2,
+    family = binomial(link = "logit"))
+  model_simple_glm
+})
+
 ```
 
 ```{r}
@@ -87,10 +90,7 @@ model_svmlinear <- train(
   data = trainset,
   method = "svmLinear",
   trControl = ctrl)
-model_svmlinear
-```
 
-```{r}
 model_svmradial <- train(
   pixel_class~.,
   data = trainset,
@@ -110,7 +110,20 @@ model_glmnet <- train(
   trControl = ctrl)
 ```
 
+```{r}
+for (classifier in list(model_svmlinear, model_svmradial,
+                        model_glm)) {
+  cat(paste(
+    "The model '",
+    classifier$modelInfo$label, "'\nHad a classification accuracy of:",
+    max(classifier$results$Accuracy), "\non its best iteration\n\n"))
+}
+```
 
+Now that we have a model, we can use the `classifier$finalModel` object to
+predict our images. Note that not all models give the same type of output.
+Some of the will output a classification percentage and others will output an
+actual classification.
 
 ```{r}
 for (classifier in list(model_svmlinear, model_svmradial,
