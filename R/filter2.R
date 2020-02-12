@@ -31,11 +31,14 @@ prep_filter.img <- function(x, filter_dims,
 
   validObject(x)
 
+  # d remains unmodified whilst dx changes
   d = dx = dim(x)
+
   dnames = dimnames(x)
 
   # cf stands for center filter ...
   cf = filter_dims %/% 2
+  df <- filter_dims
 
   switch(
     boundary,
@@ -93,7 +96,7 @@ prep_filter.img <- function(x, filter_dims,
     }
   )
 
-  attr(x, "d") <- dx
+  attr(x, "d") <- d
   attr(x, "dx") <- dx
   attr(x, "dnames") <- dnames
 
@@ -101,8 +104,10 @@ prep_filter.img <- function(x, filter_dims,
 }
 
 #' @describeIn filter2.prepared precomputes the filter to be applied
-prep_filter.filter <- function(filter, dim_x) {
-  dx <- dim_x
+prep_filter.filter <- function(filter, dim_x_proc) {
+  # in retrospect ... having this one separate is handy for functional
+  # programming and job dispatchment but not really time efficient per-se
+  dx <- dim_x_proc
 
   validObject(filter)
 
@@ -155,6 +160,7 @@ prep_filter.filter <- function(filter, dim_x) {
 #' Calculate spatial filtering on precomputed objects
 #'
 #' @param prep_x a prepared image file
+#' @param raw_x non-prepared image file, defaults to raw_x
 #' @param fft_x  output of the prepared image in `fftwtools::fftw2d`
 #' @param dims_x dimensions output from the image processing
 #' @param dims_x_orig dimension of the original image file
@@ -186,6 +192,7 @@ prep_filter.filter <- function(filter, dim_x) {
 #' all(oldschool_filtered == filtered_img)
 #' # [1] TRUE
 filter2.prepared <- function(prep_x,
+                             raw_x = prep_x,
                              fft_x = fftwtools::fftw2d(prep_x),
                              dims_x,
                              dims_x_orig,
@@ -196,7 +203,10 @@ filter2.prepared <- function(prep_x,
   boundary = match.arg(boundary)
   # Circular boundry does not require filter size in the preparation of
   # x ... could be the most efficient way to calculate all of those ...
-  res = prep_x
+  res <- raw_x
+  attr(res, "d") <- NULL
+  attr(res, "dx") <- NULL
+  attr(res, "dimnames") <- NULL
 
   ## convert to a frame-based 3D array
   if ( length(dims_x) > 2L ) {
@@ -217,39 +227,28 @@ filter2.prepared <- function(prep_x,
   res
 }
 
+mem_fft <- memoise::memoise(fftwtools::fftw2d)
+mem_prep_filter.img <- memoise::memoise(prep_filter.img)
 
-test_prep_filter <- function() {
-  require(EBImage)
+lazy_filter2 <- function(img, filter, boundary) {
+  prepd_img <- mem_prep_filter.img(
+    img, filter_dims = dim(filter),
+    boundary = "replicate")
 
-  f = system.file("images", "sample.png", package="EBImage")
-  img = EBImage::readImage(f)
-  my_filter <- EBImage::makeBrush(31, "gaussian", sigma = 4)
+  prepd_filt <- prep_filter.filter(
+    filter = filter,
+    dim_x_proc = attr(prepd_img, "dx"))
 
-  prepd_filt <- prep_filter.filter(filter = my_filter, dim_x = dim(img))
-  fft_img <- fftwtools::fftw2d(img)
-
-  # Image preprocessing can be skiped if using circular to handle boundries...
-  filtered_img <- filter2.prepared(
-    prep_x = img,
-    fft_x = fft_img,
-    dims_x = dim(img),
-    dims_x_orig = dim(img),
-    x_dimnames = dimnames(img),
-    prep_filter = prepd_filt)
-
-  oldschool_filtered <- EBImage::filter2(img, my_filter)
-  all(oldschool_filtered == filtered_img)
-  # [1] TRUE
-
-  prepd_img <- prep_filter.img(x = img, dim(my_filter), boundary = "circular")
+  fft_img <- mem_fft(prepd_img)
 
   filtered_img <- filter2.prepared(
     prep_x = prepd_img,
+    raw_x = img,
     fft_x = fft_img,
     dims_x = attr(prepd_img, "dx"),
     dims_x_orig = attr(prepd_img, "d"),
-    prep_filter = prepd_filt)
+    prep_filter = prepd_filt,
+    boundary = "replicate")
 
-  # display(filtered_img, method = "raster")
-
+  return(filtered_img)
 }

@@ -23,13 +23,17 @@ calc_features <- function(img, filter_widths = c(3,5,11,23), verbose = FALSE){
     message("Filters of size: {", paste0(filter_widths, collapse = ","), "}\n")
 
     filter_widths <- sort(filter_widths)
-    # TODO reimplement this as function factory
+
     g_filtered <- furrr::future_map_dfc(
         filter_widths,
-        ~ as.numeric(EBImage::gblur(
-            img,
-            sigma = .x,
-            boundary='replicate')))
+        ~ as.numeric(
+            EBImage::filter2(
+                img,
+                filter = EBImage::makeBrush(
+                    size = 2 * ceiling(3 * .x) + 1,
+                    shape = "Gaussian",
+                    sigma = .x),
+                boundary='replicate')))
     names(g_filtered) <- paste0("gauss_filt_", filter_widths)
 
     # TODO microbenchmark if its faster to call by index or argument
