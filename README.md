@@ -7,7 +7,23 @@
 
 <!-- badges: end -->
 
-The goal of clasifierrr is to …
+## Motivation
+
+The goal of clasifierrr is to … classify image regions using R.
+
+In my field of study, there are many cases where one has a lot of images
+that require classification. Whether it is counting cells, quantifying
+areas in IHC, counting dots in cells, measuring spheroid sizes … And it
+would be nice to automate those tasks.
+
+Nonetheless, many of those classification parameters are
+experiment-specific, making a generalized classifier inpractical. In
+addition, the number of images is usually enough to be extremely tedious
+to work out by a human but not enough to train a neural network.
+
+clasifierrr takes care of those cases, where small datasets are used to
+build a clasification algorithm and allow the user to deploy it on many
+images.
 
 ## Installation
 
@@ -68,12 +84,22 @@ classify, draw on a new layer, disable the main layer and export to a
 png.
 
 ``` r
+base_image <- readImageBw(system.file(
+            "extdata", "tiny_4T1-shNT-1.png",
+            package = "clasifierrr"))
+display(base_image, method = "raster")
+```
+
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+
+``` r
+
 display(readImageBw(system.file(
             "extdata", "tiny_4T1-shNT-1_layer1.png",
             package = "clasifierrr")), method = "raster")
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-3-2.png" width="100%" />
 
 ``` r
 
@@ -82,17 +108,9 @@ display(readImageBw(system.file(
             package = "clasifierrr")), method = "raster")
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-2.png" width="100%" />
-
-``` r
-
-base_image <- readImageBw(system.file(
-            "extdata", "tiny_4T1-shNT-1.png",
-            package = "clasifierrr"))
-display(base_image, method = "raster")
-```
-
 <img src="man/figures/README-unnamed-chunk-3-3.png" width="100%" />
+
+### Calculating Features
 
 The classifier is based on the concept of features, which is applying
 several filters to the image to detect edges and calculate the
@@ -112,7 +130,7 @@ features <- calc_features(base_image, filter_widths = c(3,5))
 #> 
 #>     transpose
 #> 
-#> Took 0.47 secs to calculate the 7 features for 31570 pixels
+#> Took 0.56 secs to calculate the 7 features for 31570 pixels
 head(features, 2)
 #>   gauss_filt_3 gauss_filt_5 gauss_diff_3  var_filt_3  var_filt_5 sobel_filt_3
 #> 1    0.4868591    0.4882913  0.002864240 0.002066252 0.003918570   0.11379308
@@ -125,14 +143,17 @@ head(features, 2)
 Each of the columns can be made to an image
 
 ``` r
-for (i in names(features)) {
-    reconstructed_image <- Image(features[[i]], dim(base_image))
-    display(reconstructed_image, method = "raster")
-    title(main = list(i, col = "yellow"))
-}
+display_filters(features, dims = dim(base_image))
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" /><img src="man/figures/README-unnamed-chunk-5-2.png" width="100%" /><img src="man/figures/README-unnamed-chunk-5-3.png" width="100%" /><img src="man/figures/README-unnamed-chunk-5-4.png" width="100%" /><img src="man/figures/README-unnamed-chunk-5-5.png" width="100%" /><img src="man/figures/README-unnamed-chunk-5-6.png" width="100%" /><img src="man/figures/README-unnamed-chunk-5-7.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+
+### Building a training dataset from the files
+
+The program goes in to the files, generates the features form the base
+image and assigns a classification to the pixles that overlap with the
+region you defined in the “classifier files” (the ones that look like
+squigly lines)
 
 ``` r
 trainset <- build_train_multi(params_df, filter_widths = c(3,5))
@@ -141,26 +162,31 @@ trainset <- build_train_multi(params_df, filter_widths = c(3,5))
 #> Starting to calculate features for image of width 154 and height 205
 #> Filters of size: {3,5}
 #> 
-#> Took 0.16 secs to calculate the 7 features for 31570 pixels
+#> Took 0.2 secs to calculate the 7 features for 31570 pixels
 #> Warning in build_train(feat_img = calc_features(preprocess_fun_img(readImageBw(.x)), : The selected train size(50000) is larger than the number of classified pixels (22567)  so the number is getting updated to the total number of available pixels
 #> Classified objects are of classesbg: 14056 and spheroid: 8511
 #> Returning a data frame of 22567 rows and 8 columns
 head(trainset)
-#>   gauss_filt_3 gauss_filt_5  gauss_diff_3   var_filt_3   var_filt_5
-#> 1   0.25783969   0.29436493  0.0730504790 3.497990e-03 3.492963e-02
-#> 2   0.04660868   0.04709824  0.0009791228 1.063219e-05 3.487234e-05
-#> 3   0.22005382   0.21696351 -0.0061806254 2.975114e-04 2.484828e-03
-#> 4   0.05142401   0.05118543 -0.0004771715 1.385982e-05 4.725202e-05
-#> 5   0.45634625   0.45400424 -0.0046840166 9.198741e-04 3.192423e-03
-#> 6   0.51705904   0.52248562  0.0108531734 1.238080e-03 4.346767e-03
-#>   sobel_filt_3 sobel_filt_5 pixel_class
-#> 1   0.44547363   1.74150324    spheroid
-#> 2   0.01240109   0.04913711    spheroid
-#> 3   0.07058824   0.14509804          bg
-#> 4   0.01753779   0.03507558    spheroid
-#> 5   0.06200544   0.16935547          bg
-#> 6   0.02986578   0.45909159          bg
+#>   gauss_filt_3 gauss_filt_5 gauss_diff_3   var_filt_3  var_filt_5 sobel_filt_3
+#> 1    0.5130531    0.5157537  0.005401085 0.0012942790 0.004966239   0.09146591
+#> 2    0.2212109    0.2334967  0.024571453 0.0044569752 0.035891620   0.44568071
+#> 3    0.3287143    0.3405416  0.023654732 0.0001985941 0.004007494   0.08942552
+#> 4    0.4482787    0.4417664 -0.013024574 0.0030757401 0.008562414   0.13719887
+#> 5    0.3351167    0.3338322 -0.002568938 0.0014634447 0.005087734   0.12201058
+#> 6    0.3351575    0.3458551  0.021395279 0.0015295162 0.005083933   0.16683959
+#>   sobel_filt_5 pixel_class
+#> 1   0.19231686          bg
+#> 2   1.34108473    spheroid
+#> 3   0.25861548          bg
+#> 4   0.35174088          bg
+#> 5   0.04722194          bg
+#> 6   0.14557421          bg
 ```
+
+### Train a classifier
+
+Here we use any “machine learning” algorithm as our classifier. I really
+like ranger, so that is what I will recommend.
 
 ``` r
 classifier <- ranger(
@@ -193,16 +219,20 @@ ask it to give you the relative importance of the variables used.
 ``` r
 sort(ranger::importance(classifier), decreasing = TRUE)
 #> gauss_filt_3   var_filt_5 gauss_filt_5   var_filt_3 sobel_filt_5 sobel_filt_3 
-#>    3041.6183    2289.3106    2106.4064    1337.6011     759.6511     719.9215 
+#>    3058.7740    2093.8286    2017.9509    1564.2430     928.7792     626.8652 
 #> gauss_diff_3 
-#>     311.2514
+#>     276.0487
 ```
 
 ### Using the classifier on an image
 
-Can be used directly on calculated features …
+The `classify_img` has an interface for many kinds of inputs depending
+on what you have planned.
+
+It Can be used directly on calculated features …
 
 ``` r
+# This just reads the image to classify
 test_img <- readImageBw(system.file(
         "extdata", "tiny_4T1-shNT-1.png",
         package = "clasifierrr"))
@@ -211,7 +241,7 @@ test_feat <- calc_features(test_img, filter_widths = c(3,5))
 #> Starting to calculate features for image of width 154 and height 205
 #> Filters of size: {3,5}
 #> 
-#> Took 0.19 secs to calculate the 7 features for 31570 pixels
+#> Took 0.21 secs to calculate the 7 features for 31570 pixels
 
 class_img <- classify_img(
     classifier, 
@@ -219,7 +249,7 @@ class_img <- classify_img(
     dims = dim(test_img), 
     class_highlight = "spheroid")
 #> Starting classification
-#> Took 0.3043 secs to predict the image
+#> Took 0.3132 secs to predict the image
 display(class_img, method = "raster")
 ```
 
@@ -236,14 +266,12 @@ class_img <- classify_img(
 #> Starting to calculate features for image of width 154 and height 205
 #> Filters of size: {3,5}
 #> 
-#> Took 0.18 secs to calculate the 7 features for 31570 pixels
+#> Took 0.19 secs to calculate the 7 features for 31570 pixels
 #> Starting classification
-#> Took 0.2963 secs to predict the image
-#> Warning in classify_img(classifier, img = test_img, filter_widths = c(3, : Found in the final classification {12426} values more than 1 and {0} values less than 0, This might be undesired in the final image and lead to inconsistencies
-display(colorLabels(class_img), method = "raster")
+#> Took 0.3317 secs to predict the image
+#> Warning in classify_img(classifier, img = test_img, filter_widths = c(3, : Found in the final classification {12443} values more than 1 and {0} values less than 0, This might be undesired in the final image and lead to inconsistencies
+# display(colorLabels(class_img), method = "raster")
 ```
-
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
 
 And as well in a system file
 
@@ -260,14 +288,12 @@ class_img <- classify_img(
 #> Starting to calculate features for image of width 154 and height 205
 #> Filters of size: {3,5}
 #> 
-#> Took 0.17 secs to calculate the 7 features for 31570 pixels
+#> Took 0.34 secs to calculate the 7 features for 31570 pixels
 #> Starting classification
-#> Took 0.3144 secs to predict the image
+#> Took 0.3135 secs to predict the image
 
-display(class_img, method = "raster")
+# display(class_img, method = "raster")
 ```
-
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
 
 ### Cleaning the final image
 
@@ -278,36 +304,18 @@ As a reminder, white regions are considered objects, so if your object
 is black, try running something like `img <- 1- img`
 
 ``` r
-display(dilate(class_img, makeBrush(3, "disc")), method = "raster")
+filt_class_img <- filter_masks(min_radius = 10, max_radius = Inf, mask = class_img)
+
+display(filt_class_img, method = "raster")
 ```
 
 <img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 ``` r
-display(colorLabels(bwlabel(class_img)), method = "raster")
-```
-
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
-
-``` r
-filt_class_img <- filter_masks(class_img, min_radius = 30, max_radius = 1000)
-
-display(
-    filt_class_img,
-    method = "raster")
-
-display(colorLabels(bwlabel(filt_class_img)), method = "raster")
-```
-
-<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
-
-``` r
-
 table(filt_class_img)
 #> filt_class_img
 #>     0     1 
-#> 19162 12408
-
+#> 19146 12424
 filt_class_img
 #> Image 
 #>   colorMode    : Grayscale 

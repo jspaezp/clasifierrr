@@ -15,21 +15,28 @@
 #' @importFrom purrr map map_dfc
 #' @importFrom furrr fiture_map future_map_dfc
 #' @importFrom EBImage Image makeBrush filter2
-calc_features <- function(img, filter_widths = c(3,5,11,23), verbose = FALSE){
+calc_features <- function(img, filter_widths = c(3,5,11,23),
+                          verbose = FALSE){
     start_time <- Sys.time()
     message("Starting to calculate features for image of width ", ncol(img),
             " and height ", nrow(img), "\n")
 
     message("Filters of size: {", paste0(filter_widths, collapse = ","), "}\n")
 
+    img_fft <- fftwtools::fftw2d(img)
+
     filter_widths <- sort(filter_widths)
-    # TODO reimplement this as function factory
+
     g_filtered <- furrr::future_map_dfc(
         filter_widths,
-        ~ as.numeric(EBImage::gblur(
-            img,
-            sigma = .x,
-            boundary='replicate')))
+        ~ as.numeric(
+            filter2_circular(
+                img,
+                filter = EBImage::makeBrush(
+                    size = 2 * ceiling(3 * .x) + 1,
+                    shape = "Gaussian",
+                    sigma = .x),
+                img_fft = img_fft)))
     names(g_filtered) <- paste0("gauss_filt_", filter_widths)
 
     # TODO microbenchmark if its faster to call by index or argument
@@ -43,15 +50,22 @@ calc_features <- function(img, filter_widths = c(3,5,11,23), verbose = FALSE){
 
     names(g_diff) <- paste0("gauss_diff_", filter_widths[-length(g_filtered)])
 
-    sobel_funs <- lapply(
+    sobel_funs <- purrr::map(
         filter_widths,
-        function(.x) { function(img) { sobel_filter(img, width = .x) } })
+        function(.x, img_fft) {
+            function(img) {
+                sobel_filter(img, width = .x, img_fft = img_fft)
+            }}, img_fft)
 
     names(sobel_funs) <- paste0("sobel_filt_", filter_widths)
 
-    v_funs <- lapply(
+    v_funs <- purrr::map(
         filter_widths,
-        function(.x) { function(img) variance_filter(img, .x) })
+        function(.x, img_fft) {
+            function(img) {
+                variance_filter(img, width = .x, img_fft = img_fft)
+            }}, img_fft)
+
     names(v_funs) <-  paste0("var_filt_", filter_widths)
 
     bound_flat <- furrr::future_map_dfc(
@@ -59,7 +73,7 @@ calc_features <- function(img, filter_widths = c(3,5,11,23), verbose = FALSE){
         ~ as.numeric(.x(img)),
         .options = furrr::future_options(
             packages = "clasifierrr",
-            globals = "img"))
+            globals = c("img")))
 
     bound_flat <- do.call(cbind, list(g_filtered, g_diff, bound_flat))
 
