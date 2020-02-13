@@ -1,0 +1,9 @@
+pandoc: '2.5'
+pkgdown: 1.4.1
+pkgdown_sha: ~
+articles:
+  alternative_classifiers: alternative_classifiers.html
+  classification_performance: classification_performance.html
+  features: features.html
+  time_performance: time_performance.html
+

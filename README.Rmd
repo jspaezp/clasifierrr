@@ -18,7 +18,23 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of clasifierrr is to ...
+## Motivation
+
+The goal of clasifierrr is to ... classify image regions using R.
+
+In my field of study, there are many cases where one has a lot of images that
+require classification. Whether it is counting cells, quantifying areas in IHC, 
+counting dots in cells, measuring spheroid sizes ... And it would be nice to 
+automate those tasks.
+
+Nonetheless, many of those classification parameters are experiment-specific,
+making a generalized classifier inpractical. In addition, the number of images
+is usually enough to be extremely tedious to work out by a human but not enough
+to train a neural network.
+
+clasifierrr takes care of those cases, where small datasets are used to build
+a clasification algorithm and allow the user to deploy it on many images.
+
 
 ## Installation
 
@@ -72,6 +88,11 @@ I personally use gimp to generate those, just open the image you want to
 classify, draw on a new layer, disable the main layer and export to a png.
 
 ```{r}
+base_image <- readImageBw(system.file(
+            "extdata", "tiny_4T1-shNT-1.png",
+            package = "clasifierrr"))
+display(base_image, method = "raster")
+
 display(readImageBw(system.file(
             "extdata", "tiny_4T1-shNT-1_layer1.png",
             package = "clasifierrr")), method = "raster")
@@ -80,12 +101,10 @@ display(readImageBw(system.file(
             "extdata", "tiny_4T1-shNT-1_layer2.png",
             package = "clasifierrr")), method = "raster")
 
-base_image <- readImageBw(system.file(
-            "extdata", "tiny_4T1-shNT-1.png",
-            package = "clasifierrr"))
-display(base_image, method = "raster")
 ```
 
+
+### Calculating Features
 
 The classifier is based on the concept of features, which is applying several
 filters to the image to detect edges and calculate the consistency with the
@@ -104,20 +123,24 @@ head(features, 2)
 Each of the columns can be made to an image
 
 ```{r}
-for (i in names(features)) {
-    reconstructed_image <- Image(features[[i]], dim(base_image))
-    display(reconstructed_image, method = "raster")
-    title(main = list(i, col = "yellow"))
-}
+display_filters(features, dims = dim(base_image))
 ```
 
+### Building a training dataset from the files
 
+The program goes in to the files, generates the features form the base image
+and assigns a classification to the pixles that overlap with the region you
+defined in the "classifier files" (the ones that look like squigly lines)
 
 ```{r}
 trainset <- build_train_multi(params_df, filter_widths = c(3,5))
 head(trainset)
 ```
 
+### Train a classifier
+
+Here we use any "machine learning" algorithm as our classifier.
+I really like ranger, so that is what I will recommend.
 
 ```{r}
 classifier <- ranger(
@@ -140,9 +163,13 @@ sort(ranger::importance(classifier), decreasing = TRUE)
 
 ### Using the classifier on an image
 
-Can be used directly on calculated features ...
+The `classify_img` has an interface for many kinds of inputs depending on what
+you have planned.
+
+It Can be used directly on calculated features ...
 
 ```{r}
+# This just reads the image to classify
 test_img <- readImageBw(system.file(
         "extdata", "tiny_4T1-shNT-1.png",
         package = "clasifierrr"))
@@ -164,7 +191,7 @@ class_img <- classify_img(
   classifier, 
   img = test_img, 
   filter_widths = c(3,5))
-display(colorLabels(class_img), method = "raster")
+# display(colorLabels(class_img), method = "raster")
 ```
 
 And as well in a system file
@@ -178,7 +205,7 @@ class_img <- classify_img(
   filter_widths = c(3,5), 
   class_highlight = "spheroid")
 
-display(class_img, method = "raster")
+# display(class_img, method = "raster")
 ```
 
 ### Cleaning the final image
@@ -190,25 +217,15 @@ As a reminder, white regions are considered objects, so if your object is black,
 try running something like `img <- 1- img`
 
 ```{r}
-display(dilate(class_img, makeBrush(3, "disc")), method = "raster")
+filt_class_img <- filter_masks(min_radius = 10, max_radius = Inf, mask = class_img)
+
+display(filt_class_img, method = "raster")
 ```
 
-```{r}
-display(colorLabels(bwlabel(class_img)), method = "raster")
-```
 
 
 ```{r}
-filt_class_img <- filter_masks(class_img, min_radius = 30, max_radius = 1000)
-
-display(
-    filt_class_img,
-    method = "raster")
-
-display(colorLabels(bwlabel(filt_class_img)), method = "raster")
-
 table(filt_class_img)
-
 filt_class_img
 ```
 

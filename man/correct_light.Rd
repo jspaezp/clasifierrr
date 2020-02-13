@@ -2,7 +2,7 @@
 % Please edit documentation in R/workflow.R
 \name{correct_light}
 \alias{correct_light}
-\title{Title}
+\title{Corrects uniform changes in light}
 \usage{
 correct_light(img, chunk_width = 200)
 }
@@ -13,7 +13,7 @@ correct_light(img, chunk_width = 200)
 
 }
 \description{
-Title
+Corrects uniform changes in light
 }
 \examples{
 
