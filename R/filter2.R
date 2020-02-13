@@ -20,7 +20,7 @@
 
 #' @describeIn filter2.prepared precomputes image to handle borders
 prep_filter.img <- function(x, filter_dims,
-                            boundary = c("circular", "linear", "replicate"),
+                            boundary = c("circular", "replicate"),
                             val = NULL) {
   if ( is.numeric(boundary) ) {
     val = boundary
@@ -227,28 +227,17 @@ filter2.prepared <- function(prep_x,
   res
 }
 
-mem_fft <- memoise::memoise(fftwtools::fftw2d)
-mem_prep_filter.img <- memoise::memoise(prep_filter.img)
 
-lazy_filter2 <- function(img, filter, boundary) {
-  prepd_img <- mem_prep_filter.img(
-    img, filter_dims = dim(filter),
-    boundary = "replicate")
-
-  prepd_filt <- prep_filter.filter(
-    filter = filter,
-    dim_x_proc = attr(prepd_img, "dx"))
-
-  fft_img <- mem_fft(prepd_img)
-
-  filtered_img <- filter2.prepared(
-    prep_x = prepd_img,
-    raw_x = img,
-    fft_x = fft_img,
-    dims_x = attr(prepd_img, "dx"),
-    dims_x_orig = attr(prepd_img, "d"),
-    prep_filter = prepd_filt,
-    boundary = "replicate")
-
-  return(filtered_img)
+# for circular the prepd image is the same as the original....
+filter2_circular <- function(img, filter, img_fft = fftwtools::fftw2d(img)) {
+  prepd_filter <- prep_filter.filter(filter = filter, dim_x_proc = dim(img))
+  filter2.prepared(prep_x = img,
+                   raw_x = img,
+                   fft_x = img_fft,
+                   dims_x = dim(img),
+                   dims_x_orig = dim(img),
+                   prep_filter = prepd_filter,
+                   x_dimnames = dimnames(img))
 }
+
+
