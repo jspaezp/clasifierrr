@@ -1,7 +1,7 @@
 Package: clasifierrr
 Type: Package
 Title: Classifies images based on features
-Version: 0.2.0
+Version: 0.2.1
 Author: J Sebastian Paez
 Maintainer: J Sebastian Paez <jspaezp@purdue.edu>
 Description: It Provide a framework to generate image features based on multiple

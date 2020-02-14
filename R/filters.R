@@ -111,3 +111,67 @@ variance_filter <- function(img, width,
 
     return(variance)
 }
+
+
+dog_kernell <- function(sigma, ratio = 5) {
+    smaller_size <- (2 * ceiling(3 * sigma) + 1)
+    largest_size <- ratio * smaller_size
+
+
+    small_gauss <- EBImage::makeBrush(
+        size = largest_size,
+        shape = "Gaussian",
+        sigma = sigma)
+
+    large_gauss <- EBImage::makeBrush(
+        size = largest_size,
+        shape = "Gaussian",
+        sigma = sigma * ratio)
+
+    combined_gauss <- large_gauss - small_gauss
+    return(combined_gauss)
+}
+
+dog_filter <- function(img, width,
+                       sigma = floor((width - 1) / 2)/3,
+                       ratio = 5,
+                       img_fft = fftwtools::fftw2d(img)){
+    # > width
+    # [1]  3  5  7  9 11
+    # > floor((width - 1) / 2)/3
+    # [1] 0.333 0.666 1.000 1.333 1.666
+    #
+    # > # for a ratio of 5 in sigma, the respective width would be
+    # [1] 11 21 31 41 51
+    #
+    # Here width is the width of the smaller filter ...
+
+    # Gaussian differences are one gaussien minus another less blurry (low sigma) one
+    # Generate Kernells
+    combined_gauss <- dog_kernell(sigma, ratio)
+
+    # Apply kernell
+    ret <- clasifierrr::filter2_circular(
+        img, combined_gauss,
+        img_fft = fftwtools::fftw2d(img))
+
+    return(ret)
+}
+
+compile_dog_filter <- function(width, dim_img,
+                               sigma = floor((width - 1) / 2)/3,
+                               ratio = 5) {
+    combined_gauss <- dog_kernell(sigma, ratio)
+    fun_dog <- prep_filter.filter(combined_gauss, dim_img)
+
+    .filter <- function(img) {
+        dog_img <- fun_dog(img)
+        return(dog_img)
+    }
+
+    return(.filter)
+}
+
+# TODO things to consider ...
+# change the back-end in all functions to the pre-compilation.
+# This would allow as well to automatically accept fourier transformed objects.
