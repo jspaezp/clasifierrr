@@ -84,31 +84,16 @@ classify, draw on a new layer, disable the main layer and export to a
 png.
 
 ``` r
-base_image <- readImageBw(system.file(
-            "extdata", "tiny_4T1-shNT-1.png",
-            package = "clasifierrr"))
-display(base_image, method = "raster")
+base_image <- readImageBw(params_df[[3]][[1]])
+display(
+  EBImage::combine(
+    base_image,
+    readImageBw(params_df[[1]][[1]]),
+    readImageBw(params_df[[1]][[2]])),
+  method = "raster", all = TRUE)
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
-
-``` r
-
-display(readImageBw(system.file(
-            "extdata", "tiny_4T1-shNT-1_layer1.png",
-            package = "clasifierrr")), method = "raster")
-```
-
-<img src="man/figures/README-unnamed-chunk-3-2.png" width="100%" />
-
-``` r
-
-display(readImageBw(system.file(
-            "extdata", "tiny_4T1-shNT-1_layer2.png",
-            package = "clasifierrr")), method = "raster")
-```
-
-<img src="man/figures/README-unnamed-chunk-3-3.png" width="100%" />
 
 ### Calculating Features
 
@@ -122,28 +107,24 @@ will need.
 
 ``` r
 features <- calc_features(base_image, filter_widths = c(3,5))
-#> Starting to calculate features for image of width 154 and height 205
-#> Filters of size: {3,5}
 #> 
 #> Attaching package: 'purrr'
 #> The following object is masked from 'package:EBImage':
 #> 
 #>     transpose
-#> 
-#> Took 0.56 secs to calculate the 7 features for 31570 pixels
 head(features, 2)
-#>   gauss_filt_3 gauss_filt_5 gauss_diff_3  var_filt_3  var_filt_5 sobel_filt_3
-#> 1    0.4868591    0.4882913  0.002864240 0.002066252 0.003918570   0.11379308
-#> 2    0.4860857    0.4887673  0.005363217 0.001608498 0.005823959   0.09180157
-#>   sobel_filt_5
-#> 1    0.1305947
-#> 2    0.3050769
+#> # A tibble: 2 x 8
+#>   gauss_filt_3 gauss_filt_5 DoG_filt_3 DoG_filt_5 var_filt_3 var_filt_5
+#>          <dbl>        <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
+#> 1        0.486        0.458   -3.94e-9    -0.0283    0.00420    0.00455
+#> 2        0.490        0.469   -3.05e-9    -0.0209    0.00337    0.00360
+#> # … with 2 more variables: sobel_filt_3 <dbl>, sobel_filt_5 <dbl>
 ```
 
 Each of the columns can be made to an image
 
 ``` r
-display_filters(features, dims = dim(base_image))
+display_filters(features, dims = dim(base_image), scale = TRUE)
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
@@ -159,28 +140,24 @@ squigly lines)
 trainset <- build_train_multi(params_df, filter_widths = c(3,5))
 #> Returning for file:  /home/jspaezp/R/x86_64-redhat-linux-gnu-library/3.6/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 8556 } positive pixels
 #> Returning for file:  /home/jspaezp/R/x86_64-redhat-linux-gnu-library/3.6/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 14056 } positive pixels
-#> Starting to calculate features for image of width 154 and height 205
-#> Filters of size: {3,5}
-#> 
-#> Took 0.2 secs to calculate the 7 features for 31570 pixels
 #> Warning in build_train(feat_img = calc_features(preprocess_fun_img(readImageBw(.x)), : The selected train size(50000) is larger than the number of classified pixels (22567)  so the number is getting updated to the total number of available pixels
-#> Classified objects are of classesbg: 14056 and spheroid: 8511
-#> Returning a data frame of 22567 rows and 8 columns
+#> Classified objects are of classes {bg: 14056} and {spheroid: 8511}
+#> Returning a data frame of 22567 rows and 9 columns
 head(trainset)
-#>   gauss_filt_3 gauss_filt_5 gauss_diff_3   var_filt_3  var_filt_5 sobel_filt_3
-#> 1    0.5130531    0.5157537  0.005401085 0.0012942790 0.004966239   0.09146591
-#> 2    0.2212109    0.2334967  0.024571453 0.0044569752 0.035891620   0.44568071
-#> 3    0.3287143    0.3405416  0.023654732 0.0001985941 0.004007494   0.08942552
-#> 4    0.4482787    0.4417664 -0.013024574 0.0030757401 0.008562414   0.13719887
-#> 5    0.3351167    0.3338322 -0.002568938 0.0014634447 0.005087734   0.12201058
-#> 6    0.3351575    0.3458551  0.021395279 0.0015295162 0.005083933   0.16683959
-#>   sobel_filt_5 pixel_class
-#> 1   0.19231686          bg
-#> 2   1.34108473    spheroid
-#> 3   0.25861548          bg
-#> 4   0.35174088          bg
-#> 5   0.04722194          bg
-#> 6   0.14557421          bg
+#>   gauss_filt_3 gauss_filt_5    DoG_filt_3    DoG_filt_5   var_filt_3
+#> 1   0.51372549   0.51264245 -1.791763e-10 -1.083042e-03 4.577748e-05
+#> 2   0.24705882   0.24500235 -2.986271e-10 -2.056473e-03 4.400544e-05
+#> 3   0.30588235   0.30818717  2.986270e-10  2.304817e-03 2.444412e-03
+#> 4   0.04313725   0.04318191 -5.056285e-18  4.465888e-05 9.282069e-07
+#> 5   0.05098039   0.05018796 -1.194508e-10 -7.924294e-04 3.670636e-06
+#> 6   0.04705882   0.04780730  1.194508e-10  7.484737e-04 1.329023e-06
+#>     var_filt_5 sobel_filt_3 sobel_filt_5 pixel_class
+#> 1 1.792853e-04  0.099826840   0.47496332          bg
+#> 2 1.678721e-04  0.012401089   0.28008347          bg
+#> 3 3.960448e-03  0.094280904   2.45943639          bg
+#> 4 1.624055e-06  0.005545936   0.01240109    spheroid
+#> 5 3.334460e-06  0.005545936   0.01568627    spheroid
+#> 6 1.466299e-06  0.017537788   0.03529412    spheroid
 ```
 
 ### Train a classifier
@@ -205,12 +182,12 @@ classifier
 #> Type:                             Classification 
 #> Number of trees:                  100 
 #> Sample size:                      22567 
-#> Number of independent variables:  7 
+#> Number of independent variables:  8 
 #> Mtry:                             2 
 #> Target node size:                 5 
 #> Variable importance mode:         impurity 
 #> Splitrule:                        gini 
-#> OOB prediction error:             0.92 %
+#> OOB prediction error:             1.84 %
 ```
 
 If the classifier was trained using `importance = "impurity"`, you can
@@ -218,10 +195,10 @@ ask it to give you the relative importance of the variables used.
 
 ``` r
 sort(ranger::importance(classifier), decreasing = TRUE)
-#> gauss_filt_3   var_filt_5 gauss_filt_5   var_filt_3 sobel_filt_5 sobel_filt_3 
-#>    3058.7740    2093.8286    2017.9509    1564.2430     928.7792     626.8652 
-#> gauss_diff_3 
-#>     276.0487
+#> gauss_filt_3 gauss_filt_5   var_filt_3   var_filt_5 sobel_filt_3 sobel_filt_5 
+#>    2791.7176    2626.9225    1500.1604    1442.9067     936.2210     824.4162 
+#>   DoG_filt_3   DoG_filt_5 
+#>     208.3463     191.6925
 ```
 
 ### Using the classifier on an image
@@ -238,10 +215,6 @@ test_img <- readImageBw(system.file(
         package = "clasifierrr"))
 
 test_feat <- calc_features(test_img, filter_widths = c(3,5))
-#> Starting to calculate features for image of width 154 and height 205
-#> Filters of size: {3,5}
-#> 
-#> Took 0.21 secs to calculate the 7 features for 31570 pixels
 
 class_img <- classify_img(
     classifier, 
@@ -249,7 +222,7 @@ class_img <- classify_img(
     dims = dim(test_img), 
     class_highlight = "spheroid")
 #> Starting classification
-#> Took 0.3132 secs to predict the image
+#> Took 0.3735 secs to predict the image
 display(class_img, method = "raster")
 ```
 
@@ -263,13 +236,9 @@ class_img <- classify_img(
   img = test_img, 
   filter_widths = c(3,5))
 #> Attempting to calculate features
-#> Starting to calculate features for image of width 154 and height 205
-#> Filters of size: {3,5}
-#> 
-#> Took 0.19 secs to calculate the 7 features for 31570 pixels
 #> Starting classification
-#> Took 0.3317 secs to predict the image
-#> Warning in classify_img(classifier, img = test_img, filter_widths = c(3, : Found in the final classification {12443} values more than 1 and {0} values less than 0, This might be undesired in the final image and lead to inconsistencies
+#> Took 0.4819 secs to predict the image
+#> Warning in classify_img(classifier, img = test_img, filter_widths = c(3, : Found in the final classification {12665} values more than 1 and {0} values less than 0, This might be undesired in the final image and lead to inconsistencies
 # display(colorLabels(class_img), method = "raster")
 ```
 
@@ -285,12 +254,8 @@ class_img <- classify_img(
   class_highlight = "spheroid")
 #> Attempting to read image from file/home/jspaezp/R/x86_64-redhat-linux-gnu-library/3.6/clasifierrr/extdata/tiny_4T1-shNT-1.png
 #> Attempting to calculate features
-#> Starting to calculate features for image of width 154 and height 205
-#> Filters of size: {3,5}
-#> 
-#> Took 0.34 secs to calculate the 7 features for 31570 pixels
 #> Starting classification
-#> Took 0.3135 secs to predict the image
+#> Took 0.647 secs to predict the image
 
 # display(class_img, method = "raster")
 ```
@@ -315,7 +280,7 @@ display(filt_class_img, method = "raster")
 table(filt_class_img)
 #> filt_class_img
 #>     0     1 
-#> 19146 12424
+#> 19349 12221
 filt_class_img
 #> Image 
 #>   colorMode    : Grayscale 
