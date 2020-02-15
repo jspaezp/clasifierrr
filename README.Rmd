@@ -88,18 +88,11 @@ I personally use gimp to generate those, just open the image you want to
 classify, draw on a new layer, disable the main layer and export to a png.
 
 ```{r}
-base_image <- readImageBw(system.file(
-            "extdata", "tiny_4T1-shNT-1.png",
-            package = "clasifierrr"))
+base_image <- readImageBw(params_df[[3]][[1]])
 display(base_image, method = "raster")
 
-display(readImageBw(system.file(
-            "extdata", "tiny_4T1-shNT-1_layer1.png",
-            package = "clasifierrr")), method = "raster")
-
-display(readImageBw(system.file(
-            "extdata", "tiny_4T1-shNT-1_layer2.png",
-            package = "clasifierrr")), method = "raster")
+display(readImageBw(params_df[[1]][[1]]), method = "raster")
+display(readImageBw(params_df[[1]][[2]]), method = "raster")
 
 ```
 
@@ -123,7 +116,7 @@ head(features, 2)
 Each of the columns can be made to an image
 
 ```{r}
-display_filters(features, dims = dim(base_image))
+display_filters(features, dims = dim(base_image), scale = TRUE)
 ```
 
 ### Building a training dataset from the files

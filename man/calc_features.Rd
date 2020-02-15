@@ -2,13 +2,24 @@
 % Please edit documentation in R/calculate_features.R
 \name{calc_features}
 \alias{calc_features}
+\alias{compile_calc_features}
 \title{Calculate filter features}
 \usage{
 calc_features(img, filter_widths = c(3, 5, 11, 23), verbose = FALSE)
+
+compile_calc_features(
+  filter_widths = c(3, 5, 11, 23),
+  img_dim,
+  verbose = FALSE
+)
 }
 \arguments{
+\item{img}{an imput image or matrix}
+
 \item{filter_widths}{a numeric vector of odd numbers to be used as the
 width of the feature filters}
+
+\item{verbose}{wether to display progress messages}
 }
 \value{
 data.frame
@@ -16,4 +27,21 @@ data.frame
 \description{
 Calculates features for each pixel based on sobel filters, gaussian and
 difference of gaussians, adds as well the position in the image
+}
+\section{Functions}{
+\itemize{
+\item \code{compile_calc_features}: returns a named list of functions that can be applied to an image
+}}
+
+\examples{
+test_image <- matrix(runif(10201), 101)
+feature_df <- calc_features(test_image, c(3,5))
+head(feature_df)
+
+feature_funs <- compile_calc_features(filter_widths = c(3,5), dim(test_image))
+feature_funs[[1]](test_image)
+
+feature_df2 <- purrr::map_dfc(feature_funs, ~ as.numeric(.x(test_image)))
+head(feature_df2)
+
 }

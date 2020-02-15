@@ -1,7 +1,7 @@
 Package: clasifierrr
 Type: Package
 Title: Classifies images based on features
-Version: 0.2.1
+Version: 0.3.0
 Author: J Sebastian Paez
 Maintainer: J Sebastian Paez <jspaezp@purdue.edu>
 Description: It Provide a framework to generate image features based on multiple
@@ -10,7 +10,6 @@ License: MIT
 Encoding: UTF-8
 LazyData: true
 Imports: 
-    ranger,
     EBImage,
     purrr,
     tibble,
@@ -18,6 +17,7 @@ Imports:
     furrr,
     fftwtools
 Suggests: 
+    ranger,
     testthat (>= 2.1.0),
     knitr,
     rmarkdown,

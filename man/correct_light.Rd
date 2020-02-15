@@ -7,7 +7,15 @@
 correct_light(img, chunk_width = 200)
 }
 \arguments{
-\item{chunk_width}{}
+\item{img}{an image}
+
+\item{chunk_width}{the chunk sized used to calculate background light
+
+The size of the chunk should be large enough that each chunk contains at
+least a part of background.
+
+Internally estimates the light in 2d and aproximates a linear model to it,
+then subtracts the estimated light.}
 }
 \value{
 

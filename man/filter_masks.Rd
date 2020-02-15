@@ -19,3 +19,13 @@ filter_masks(mask, min_radius, max_radius)
 \description{
 Filters out in a mask objects that are too little or too large
 }
+\examples{
+img <- readImageBw(system.file("extdata", "tiny_4T1-shNT-1.png", package = "clasifierrr"))
+mask <- EBImage::thresh(img)
+
+# EBImage::display(mask)
+
+# EBImage::display(filter_masks(mask, min_radius = 2, max_radius = Inf))
+# EBImage::display(filter_masks(mask, min_radius = 0, max_radius = 20))
+
+}

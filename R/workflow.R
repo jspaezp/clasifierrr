@@ -2,8 +2,14 @@
 
 #' Corrects uniform changes in light
 #'
-#' @param img
-#' @param chunk_width
+#' @param img an image
+#' @param chunk_width the chunk sized used to calculate background light
+#'
+#' The size of the chunk should be large enough that each chunk contains at
+#' least a part of background.
+#'
+#' Internally estimates the light in 2d and aproximates a linear model to it,
+#' then subtracts the estimated light.
 #'
 #' @return
 #' @export
@@ -43,9 +49,17 @@ correct_light <- function(img, chunk_width = 200) {
 #' @param max_radius maximum radius of objects to keep
 #'
 #' @return
-#' @export img
+#' @export
 #'
 #' @examples
+#' img <- readImageBw(system.file("extdata", "tiny_4T1-shNT-1.png", package = "clasifierrr"))
+#' mask <- EBImage::thresh(img)
+#'
+#' # EBImage::display(mask)
+#'
+#' # EBImage::display(filter_masks(mask, min_radius = 2, max_radius = Inf))
+#' # EBImage::display(filter_masks(mask, min_radius = 0, max_radius = 20))
+#'
 #' @importFrom EBImage bwlabel computeFeatures.shape
 filter_masks <- function(mask, min_radius, max_radius) {
     mask <- EBImage::bwlabel(mask)
@@ -182,6 +196,36 @@ build_train <- function(feat_img, pixel_classes, train_size = 50000) {
     return(train_data)
 }
 
+
+#' Calculates a data frame to train classifiers
+#'
+#' @param imgs_df a data frame specifying the masks and images to use, see details
+#' @param train_size_each number of elements to keep for each mask/image combination
+#' @param preprocess_fun_img optional, processing function to be applied to each image
+#' @param preprocess_fun_mask optional, processing function to be applied to each mask
+#' @param filter_widths numeric vector with the filter widths to be used
+#'
+#' @return data.frame
+#' @export
+#'
+#' @examples
+#' params_df <- tibble::tibble(
+#'     file = c(
+#'         system.file(
+#'             "extdata", "tiny_4T1-shNT-1_layer1.png",
+#'             package = "clasifierrr"),
+#'         system.file(
+#'             "extdata", "tiny_4T1-shNT-1_layer2.png",
+#'             package = "clasifierrr")),
+#'     classif = c("spheroid", "bg"),
+#'     related_file = system.file(
+#'         "extdata", "tiny_4T1-shNT-1.png",
+#'         package = "clasifierrr")
+#'     )
+#' trainset <- build_train_multi(
+#'     params_df,
+#'     train_size_each = 5000,
+#'     filter_widths = c(3,5))
 build_train_multi <- function(imgs_df,
                               train_size_each = 50000,
                               preprocess_fun_img = NULL,
@@ -212,12 +256,14 @@ build_train_multi <- function(imgs_df,
 
     tbl <- table(trainset$pixel_class)
     message(
-        "Classified objects are of classes",
+        "Classified objects are of classes {",
         paste(
             names(tbl),
             as.numeric(tbl),
             sep = ": ",
-            collapse = " and "))
+            collapse = "} and {"),
+        "}\n\n")
+
     message(
         "Returning a data frame of ",
         nrow(trainset),
@@ -266,6 +312,26 @@ test_build_train_multi <- function() {
 #' @export
 #'
 #' @examples
+#' params_df <- tibble::tibble(
+#'     file = c(
+#'         system.file(
+#'             "extdata", "tiny_4T1-shNT-1_layer1.png",
+#'             package = "clasifierrr"),
+#'         system.file(
+#'             "extdata", "tiny_4T1-shNT-1_layer2.png",
+#'             package = "clasifierrr")),
+#'     classif = c("spheroid", "bg"),
+#'     related_file = system.file(
+#'         "extdata", "tiny_4T1-shNT-1.png",
+#'         package = "clasifierrr")
+#'     )
+#' trainset <- build_train_multi(params_df, filter_widths = c(3, 5, 15))
+#' trainset$pixel_class <- trainset$pixel_class == "spheroid"
+#' model_simple_glm <- glm(pixel_class~.,data = trainset, family = binomial(link = "logit"))
+#' class_img <- classify_img(
+#'     model_simple_glm, path = params_df[[3]][[1]],
+#'     filter_widths = c(3, 5, 15))
+#' # plot(as.raster(class_img))
 classify_img <- function(classifier, path = NULL, img = NULL,
                          feature_frame = NULL, filter_widths = NULL,
                          class_highlight = NULL,
@@ -379,18 +445,25 @@ predict_img.glmnet <- function(x, feature_frame) {
 
 #' Displays the data from a feature frame
 #'
-#' @param feature_df
-#' @param dims
+#' @param feature_df a data frame with the calculated features, usually from `calc_features`
+#' @param dims the original dimensions of the image
+#' @param scale defaults to `FALSE`
 #'
 #' @return
 #' @export
+#' @seealso calc_features
 #'
 #' @examples
 #' myfile <- system.file("extdata", "4T1-shNT-1.png", package = "clasifierrr")
 #' myimg <- readImageBw(myfile)
 #' myfeat <- calc_features(myimg, c(3,5))
 #' display_filters(myfeat, dim(myimg))
-display_filters <- function(feature_df, dims) {
+display_filters <- function(feature_df, dims, scale = FALSE) {
+
+    if (scale) {
+        feature_df <- lapply(feature_df, function(...) { scale(...) + 0.5 } )
+    }
+
     image_full_list <- purrr::map(
         names(feature_df),
         ~ EBImage::Image(feature_df[[.x]], dims))

@@ -26,7 +26,8 @@ calc_sobel_kern <- function(width) {
     return(list(y = m, x = t(m)))
 }
 
-
+#' @describeIn sobel_filter pre-calculates parameters and returns a function
+#' @export
 compile_sobel_filter <- function(width, dim_img) {
     sobel_kern <- calc_sobel_kern(width)
     fun_x <- prep_filter.filter(sobel_kern$x, dim_img)
@@ -44,6 +45,27 @@ compile_sobel_filter <- function(width, dim_img) {
     return(.filter)
 }
 
+#' Calculating sobel filters
+#'
+#' The sobel filter is used to detect edges in the images
+#'
+#' @param img Dimensions of the image
+#' @param width width of the filter to be applied
+#' @param img_fft optional argument to pass the pre-computed fourier tranform of
+#'                the image from `fftwtools::fftw2d(img)`.
+#' @param dim_img the dimensions of the image to be used later during filtering,
+#'                only needed if pre-compiling the filter.
+#'
+#' @return
+#' @export
+#'
+#' @family filters
+#' @examples
+#' test_image <- matrix(runif(81), 9)
+#' sobel_filter(test_image, 3)
+#'
+#' my_sobel_filter <- compile_sobel_filter(3, dim(test_image))
+#' my_sobel_filter(test_image)
 sobel_filter <- function(img, width = 3,
                          img_fft = fftwtools::fftw2d(img)) {
     sobel_kern <- calc_sobel_kern(width)
@@ -62,7 +84,8 @@ sobel_filter <- function(img, width = 3,
     return(ret)
 }
 
-
+#' @describeIn variance_filter pre-calculates parameters and returns a function
+#' @export
 compile_variance_filter <- function(width, dim_img) {
     sum_kernel <- EBImage::makeBrush(width, "disc")
     mean_kernell <- sum_kernel/sum(sum_kernel)
@@ -90,6 +113,22 @@ compile_variance_filter <- function(width, dim_img) {
 }
 
 
+#' Calculate variance filter of an image
+#'
+#' Ths filter accentuates areas of high textre
+#'
+#' @inheritParams sobel_filter
+#'
+#' @return
+#' @export
+#'
+#' @family filters
+#' @examples
+#' test_image <- matrix(runif(81), 9)
+#' variance_filter(test_image, 3)
+#'
+#' my_variance_filter <- compile_variance_filter(3, dim(test_image))
+#' my_variance_filter(test_image)
 variance_filter <- function(img, width,
                             img_fft = fftwtools::fftw2d(img)){
     # Generate Kernells
@@ -113,42 +152,57 @@ variance_filter <- function(img, width,
 }
 
 
-dog_kernell <- function(sigma, ratio = 5) {
-    smaller_size <- (2 * ceiling(3 * sigma) + 1)
-    largest_size <- ratio * smaller_size
-
+dog_kernell <- function(largest_sigma, largest_width, ratio = 5) {
+    # The sigma here would be the sigma of the smaller blur
 
     small_gauss <- EBImage::makeBrush(
-        size = largest_size,
+        size = largest_width,
         shape = "Gaussian",
-        sigma = sigma)
+        sigma = largest_sigma / ratio)
 
     large_gauss <- EBImage::makeBrush(
-        size = largest_size,
+        size = largest_width,
         shape = "Gaussian",
-        sigma = sigma * ratio)
+        sigma = largest_sigma)
 
     combined_gauss <- large_gauss - small_gauss
     return(combined_gauss)
 }
 
+
+#' Calculates the difference of gaussian filter
+#'
+#' This filter attempts to enhance the features in an image, it is based on
+#' subtracting a blurry image from a less blurry one. The ratio of this
+#' blurrines is measured by the ratio in their `sigma`.
+#'
+#' @inheritParams sobel_filter
+#' @param ratio the ratio of the sigma between the blurrier and
+#'              the less blurry images
+#'
+#' @return
+#' @export
+#'
+#' @family filters
+#' @examples
+#' test_image <- matrix(runif(81), 9)
+#' dog_filter(test_image, 3)
+#'
+#' my_dog_filter <- compile_dog_filter(3, dim(test_image))
+#' my_dog_filter(test_image)
 dog_filter <- function(img, width,
-                       sigma = floor((width - 1) / 2)/3,
                        ratio = 5,
                        img_fft = fftwtools::fftw2d(img)){
-    # > width
-    # [1]  3  5  7  9 11
-    # > floor((width - 1) / 2)/3
-    # [1] 0.333 0.666 1.000 1.333 1.666
-    #
-    # > # for a ratio of 5 in sigma, the respective width would be
-    # [1] 11 21 31 41 51
-    #
-    # Here width is the width of the smaller filter ...
+
+    # This would be the largest sigma posible ...
+    sigma <- ((width/2) - 1)/3
 
     # Gaussian differences are one gaussien minus another less blurry (low sigma) one
     # Generate Kernells
-    combined_gauss <- dog_kernell(sigma, ratio)
+    combined_gauss <- dog_kernell(
+        largest_sigma = sigma,
+        largest_width = width,
+        ratio)
 
     # Apply kernell
     ret <- clasifierrr::filter2_circular(
@@ -158,10 +212,18 @@ dog_filter <- function(img, width,
     return(ret)
 }
 
+#' @describeIn dog_filter pre-calculates parameters and returns a function
+#' @export
 compile_dog_filter <- function(width, dim_img,
-                               sigma = floor((width - 1) / 2)/3,
                                ratio = 5) {
-    combined_gauss <- dog_kernell(sigma, ratio)
+    # This would be the sigma for the largest ...
+    sigma = ((width/2) - 1)/3
+
+    combined_gauss <- dog_kernell(
+        largest_sigma = sigma,
+        largest_width = width,
+        ratio)
+
     fun_dog <- prep_filter.filter(combined_gauss, dim_img)
 
     .filter <- function(img) {

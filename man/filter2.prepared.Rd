@@ -51,9 +51,11 @@ Calculate spatial filtering on precomputed objects
 }
 \section{Functions}{
 \itemize{
-\item \code{prep_filter.img}: precomputes image to handle borders
+\item \code{prep_filter.img}: precomputes image to handle borders, returns an image
+with attributes
 
-\item \code{prep_filter.filter}: precomputes the filter to be applied
+\item \code{prep_filter.filter}: precomputes the filter to be applied and returns a function,
+requires the dimensions of the post-processed image.
 }}
 
 \examples{

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Title — get_classifications • clasifierrr</title>
+<title>Calculating sobel filters — compile_sobel_filter • clasifierrr</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Title — get_classifications" />
-<meta property="og:description" content="imgs shouls be a data frame of files and classifications and related images" />
+<meta property="og:title" content="Calculating sobel filters — compile_sobel_filter" />
+<meta property="og:description" content="The sobel filter is used to detect edges in the images" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -121,27 +121,39 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Title</h1>
+    <h1>Calculating sobel filters</h1>
     
-    <div class="hidden name"><code>get_classifications.Rd</code></div>
+    <div class="hidden name"><code>sobel_filter.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>imgs shouls be a data frame of files and classifications and related images</p>
+    <p>The sobel filter is used to detect edges in the images</p>
     </div>
 
-    <pre class="usage"><span class='fu'>get_classifications</span>(<span class='no'>imgs_df</span>, <span class='kw'>preprocess_fun_mask</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>compile_sobel_filter</span>(<span class='no'>width</span>, <span class='no'>dim_img</span>)
+
+<span class='fu'>sobel_filter</span>(<span class='no'>img</span>, <span class='kw'>width</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>img_fft</span> <span class='kw'>=</span> <span class='kw pkg'>fftwtools</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/fftwtools/man/fftw2d.html'>fftw2d</a></span>(<span class='no'>img</span>))</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>imgs_df</th>
-      <td><p>data frame with 3 columns, file, classif and related_file</p></td>
+      <th>width</th>
+      <td><p>width of the filter to be applied</p></td>
     </tr>
     <tr>
-      <th>preprocess_fun_mask</th>
-      <td><p>optional preprocessing function to be used on the images</p></td>
+      <th>dim_img</th>
+      <td><p>the dimensions of the image to be used later during filtering,
+only needed if pre-compiling the filter.</p></td>
+    </tr>
+    <tr>
+      <th>img</th>
+      <td><p>Dimensions of the image</p></td>
+    </tr>
+    <tr>
+      <th>img_fft</th>
+      <td><p>optional argument to pass the pre-computed fourier tranform of
+the image from `fftwtools::fftw2d(img)`.</p></td>
     </tr>
     </table>
 
@@ -150,19 +162,69 @@
     
 
 
+    <h2 class="hasAnchor" id="functions"><a class="anchor" href="#functions"></a>Functions</h2>
+
+    
+<ul>
+<li><p><code>compile_sobel_filter</code>: pre-calculates parameters and returns a function</p></li>
+</ul>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>Other filters: 
+<code><a href='variance_filter.html'>compile_variance_filter</a>()</code>,
+<code><a href='dog_filter.html'>dog_filter</a>()</code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>in_df</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span>(
-  <span class='kw'>file</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"image1_class1.png"</span>, <span class='st'>"image1_class2.png"</span>),
-  <span class='kw'>classif</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"class1"</span>, <span class='st'>"class2"</span>),
-  <span class='kw'>related_file</span> <span class='kw'>=</span> <span class='st'>"image1.png"</span>
-)</div></pre>
+    <pre class="examples"><div class='input'><span class='no'>test_image</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fu'><a href='https://rdrr.io/r/stats/Uniform.html'>runif</a></span>(<span class='fl'>81</span>), <span class='fl'>9</span>)
+<span class='fu'>sobel_filter</span>(<span class='no'>test_image</span>, <span class='fl'>3</span>)</div><div class='output co'>#&gt;            [,1]      [,2]      [,3]      [,4]      [,5]      [,6]      [,7]
+#&gt;  [1,] 0.4245455 2.2740550 0.9470254 1.6751756 0.5554362 1.4059110 1.5265315
+#&gt;  [2,] 0.5324474 1.8085346 0.9115098 1.8119673 0.2480912 1.2526553 2.0636632
+#&gt;  [3,] 0.3019312 1.6022725 0.9256606 1.1091678 1.0476057 0.1368977 1.4959338
+#&gt;  [4,] 0.7728303 2.2058616 1.2184364 1.0331480 1.0456269 1.4271508 1.2108049
+#&gt;  [5,] 0.9030726 2.0763441 1.2813699 0.6563363 0.4751827 1.5730021 1.7689434
+#&gt;  [6,] 1.5998222 1.2675711 1.0559480 1.2657187 1.5153197 0.1328465 0.9925235
+#&gt;  [7,] 1.1282111 2.2523007 2.2462812 1.1708179 0.4870297 1.3134240 0.8979116
+#&gt;  [8,] 0.3890807 0.8330062 1.1278124 0.9681000 2.0288845 1.8262824 2.5311444
+#&gt;  [9,] 0.4906121 1.2715136 2.2501113 0.7774343 2.1897731 2.3309071 1.9383280
+#&gt;            [,8]      [,9]
+#&gt;  [1,] 0.8809468 0.6626284
+#&gt;  [2,] 2.0014402 0.7694960
+#&gt;  [3,] 1.1077526 0.8251930
+#&gt;  [4,] 1.3126208 0.4717449
+#&gt;  [5,] 1.9308593 0.3848323
+#&gt;  [6,] 1.4091946 1.4347901
+#&gt;  [7,] 2.4225626 1.4140400
+#&gt;  [8,] 2.8395274 1.1664651
+#&gt;  [9,] 1.6446548 0.6834588</div><div class='input'>
+<span class='no'>my_sobel_filter</span> <span class='kw'>&lt;-</span> <span class='fu'>compile_sobel_filter</span>(<span class='fl'>3</span>, <span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span>(<span class='no'>test_image</span>))
+<span class='fu'>my_sobel_filter</span>(<span class='no'>test_image</span>)</div><div class='output co'>#&gt;            [,1]      [,2]      [,3]      [,4]      [,5]      [,6]      [,7]
+#&gt;  [1,] 0.4245455 2.2740550 0.9470254 1.6751756 0.5554362 1.4059110 1.5265315
+#&gt;  [2,] 0.5324474 1.8085346 0.9115098 1.8119673 0.2480912 1.2526553 2.0636632
+#&gt;  [3,] 0.3019312 1.6022725 0.9256606 1.1091678 1.0476057 0.1368977 1.4959338
+#&gt;  [4,] 0.7728303 2.2058616 1.2184364 1.0331480 1.0456269 1.4271508 1.2108049
+#&gt;  [5,] 0.9030726 2.0763441 1.2813699 0.6563363 0.4751827 1.5730021 1.7689434
+#&gt;  [6,] 1.5998222 1.2675711 1.0559480 1.2657187 1.5153197 0.1328465 0.9925235
+#&gt;  [7,] 1.1282111 2.2523007 2.2462812 1.1708179 0.4870297 1.3134240 0.8979116
+#&gt;  [8,] 0.3890807 0.8330062 1.1278124 0.9681000 2.0288845 1.8262824 2.5311444
+#&gt;  [9,] 0.4906121 1.2715136 2.2501113 0.7774343 2.1897731 2.3309071 1.9383280
+#&gt;            [,8]      [,9]
+#&gt;  [1,] 0.8809468 0.6626284
+#&gt;  [2,] 2.0014402 0.7694960
+#&gt;  [3,] 1.1077526 0.8251930
+#&gt;  [4,] 1.3126208 0.4717449
+#&gt;  [5,] 1.9308593 0.3848323
+#&gt;  [6,] 1.4091946 1.4347901
+#&gt;  [7,] 2.4225626 1.4140400
+#&gt;  [8,] 2.8395274 1.1664651
+#&gt;  [9,] 1.6446548 0.6834588</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
+      <li><a href="#functions">Functions</a></li>
+      <li><a href="#see-also">See also</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>
 

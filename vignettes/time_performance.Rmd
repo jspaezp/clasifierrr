@@ -15,7 +15,11 @@ knitr::opts_chunk$set(
 ```
 
 
-# Image Pre-processing
+# Introduction
+
+Sometimes processing images is computtionally expensive, more noticeably ... 
+slow, this vignette tries to show the ways in which image processing can be
+accelerated.
 
 ```{r setup}
 library(clasifierrr)
@@ -47,6 +51,7 @@ base_image <- readImageBw(params_df[[3]][[1]])
 display(base_image, method = "raster")
 ```
 
+# Image Pre-processing
 
 ```{r}
 time_taken_full <- system.time({
@@ -99,12 +104,8 @@ lets take a look at the actual filters ...
 
 
 ```{r}
-
-image_shrunk_list <- purrr::map(names(features), ~ Image(shrunk_features[[.x]], dim(shrunk_image)))
-image_full_list <- purrr::map(names(features), ~ Image(features[[.x]], dim(base_image)))
-
-display(combine(image_shrunk_list), method = "raster", all = TRUE)
-display(combine(image_full_list), method = "raster", all = TRUE)
+display_filters(shrunk_features, dim(shrunk_image), scale = TRUE)
+display_filters(features, dim(base_image), scale = TRUE)
 ```
 
 Note how, since the filter sizes are still the same,
@@ -180,5 +181,53 @@ multi_time_shrunk <- system.time({
         train_size_each = 1000, 
         filter_widths = c(3,5))
 })
+```
+
+# Precompilation of filters
+
+This section does not address per-se accelerating things but re-using sections
+of the functions when processing many images.
+
+```{r}
+system.time({
+for (i in 1:10) {
+  features <- calc_features(
+    base_image, 
+    filter_widths = c(3,5,7,11,15))
+}})
+
+fft_image <- fftwtools::fftw2d(base_image)
+precompiled_filters <- compile_calc_features(c(3,5,7,11,15), dim(base_image))
+
+system.time({
+for (i in 1:10) {
+  features <- purrr::map_dfc(precompiled_filters, ~ as.numeric(.x(fft_image)))
+}})
+
+```
+
+Internally what happens is that, each image gets converted to fourer space, the 
+filter is expanded to the size of the image and converted to fourier space. 
+Multiplied (in fourier space) and the product of the two of them is then 
+converted back to normal space.
+
+Converting to fourier space is expensive, but if every filter will use the same
+converted image, that can be calculated once and saved. In the same way, if a 
+filter will be used many times (on images the same size), it can be calculated
+and used many times.
+
+# Parallel processing
+
+Some of the internals of the functions that calculate many filters are based on
+the `future` package, which allows one to run them in parallel.
+
+```{r}
+require(future)
+plan(multiprocess, workers = 2)
+
+features <- calc_features(
+  base_image, 
+  filter_widths = c(3,5,7,11,15))
+
 ```
 

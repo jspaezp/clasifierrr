@@ -41,8 +41,4 @@ test_that("Prepared filter outputs the same as EBImage implementation", {
 
   expect_equal(filtered_img, oldschool_filtered)
 
-  lazy_filtered <- lazy_filter2(img, my_filter, boundary = "replicate")
-  oldschool_filtered <- EBImage::filter2(img, my_filter, boundary = "replicate")
-  expect_equal(lazy_filtered, oldschool_filtered)
-
 })

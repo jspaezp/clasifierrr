@@ -4,10 +4,14 @@
 \alias{display_filters}
 \title{Displays the data from a feature frame}
 \usage{
-display_filters(feature_df, dims)
+display_filters(feature_df, dims, scale = FALSE)
 }
 \arguments{
-\item{dims}{}
+\item{feature_df}{a data frame with the calculated features, usually from `calc_features`}
+
+\item{dims}{the original dimensions of the image}
+
+\item{scale}{defaults to `FALSE`}
 }
 \value{
 
@@ -20,4 +24,7 @@ myfile <- system.file("extdata", "4T1-shNT-1.png", package = "clasifierrr")
 myimg <- readImageBw(myfile)
 myfeat <- calc_features(myimg, c(3,5))
 display_filters(myfeat, dim(myimg))
+}
+\seealso{
+calc_features
 }
