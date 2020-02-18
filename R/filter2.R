@@ -234,6 +234,7 @@ filter2.prepared <- function(prep_x,
 
 
 # for circular the prepd image is the same as the original....
+#' @export
 filter2_circular <- function(img, filter, img_fft = fftwtools::fftw2d(img)) {
   prepd_filter <- prep_filter.filter(filter = filter, dim_x_proc = dim(img))
   filter2.prepared(prep_x = img,
