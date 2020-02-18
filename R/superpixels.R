@@ -22,7 +22,14 @@ slic <- function(img, num_superpixel = 200, compactness = 1) {
 
     init_centers <- round(seq(1, length(img),length.out = num_superpixel))
 
+    start_time <- Sys.time()
     km <- kmeans(kmeans_mat, kmeans_mat[init_centers,], iter.max = 10)
+    time_taken <- Sys.time() - start_time
+
+    message(
+        "Took ", format(as.numeric(time_taken), digits = 4),
+        attr(time_taken, "units"), " to generate ", num_superpixel,
+        " superpixels")
 
     segments_img <- EBImage::Image(km$cluster, dim = dim(img))
     superpixel_img <- EBImage::Image(km$centers[km$cluster, 3], dim = dim(img))
@@ -68,7 +75,7 @@ classify_img_sliced <- function(classifier, img, slices = slic(sobel_filter(img,
         class_highlight = class_highlight)
     pred_img <- EBImage::Image(
         pred[as.numeric(slices)],
-        dim = dim(base_image))
+        dim = dim(img))
 
     return(pred_img)
 }
