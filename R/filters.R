@@ -154,6 +154,8 @@ variance_filter <- function(img, width,
 
 dog_kernell <- function(largest_sigma, largest_width, ratio = 5) {
     # The sigma here would be the sigma of the smaller blur
+    # involves the subtraction of one blurred version of an original image
+    # *from* another, less blurred version of the original (less - more)
 
     small_gauss <- EBImage::makeBrush(
         size = largest_width,
@@ -165,8 +167,8 @@ dog_kernell <- function(largest_sigma, largest_width, ratio = 5) {
         shape = "Gaussian",
         sigma = largest_sigma)
 
-    combined_gauss <- large_gauss - small_gauss
-    return(combined_gauss)
+    ret_kern <-  small_gauss - large_gauss
+    return(ret_kern)
 }
 
 
@@ -195,18 +197,25 @@ dog_filter <- function(img, width,
                        img_fft = fftwtools::fftw2d(img)){
 
     # This would be the largest sigma posible ...
-    sigma <- ((width/2) - 1)/3
+    sigma <- (1/6)*((width/2) - 1)
+    if (sigma <= 0) {
+        warning("unable to set sigma with that width, setting it to 0.1\n")
+        sigma <- 0.1
+    }
 
+    # involves the subtraction of one blurred version of an original image
+    # *from* another, less blurred version of the original (less - more)
+    #
     # Gaussian differences are one gaussien minus another less blurry (low sigma) one
     # Generate Kernells
-    combined_gauss <- dog_kernell(
+    kernell <- dog_kernell(
         largest_sigma = sigma,
         largest_width = width,
         ratio)
 
     # Apply kernell
     ret <- clasifierrr::filter2_circular(
-        img, combined_gauss,
+        img, kernell,
         img_fft = fftwtools::fftw2d(img))
 
     return(ret)
@@ -216,8 +225,11 @@ dog_filter <- function(img, width,
 #' @export
 compile_dog_filter <- function(width, dim_img,
                                ratio = 5) {
-    # This would be the sigma for the largest ...
-    sigma = ((width/2) - 1)/3
+    sigma <- (1/6)*((width/2) - 1)
+    if (sigma <= 0) {
+        warning("unable to set sigma with that width, setting it to 0.1\n")
+        sigma <- 0.1
+    }
 
     combined_gauss <- dog_kernell(
         largest_sigma = sigma,

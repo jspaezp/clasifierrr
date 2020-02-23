@@ -42,3 +42,17 @@ display_filters(feature_df, dims = dim(base_image))
 display_filters(feature_df, dims = dim(base_image), scale = TRUE)
 ```
 
+In order to show what each of them does, lets use a really simple image
+
+```{r}
+shapes <- readImage(system.file('images', 'shapes.png', package = 'EBImage'))
+logo <- shapes[110:512,1:130]
+
+logo_feature_df <- calc_features(logo, filter_widths = c(3, 5, 15))
+head(logo_feature_df)
+display_filters(logo_feature_df, dims = dim(logo), scale = TRUE)
+
+```
+
+Note how some filters totally remove the inner spaces of the letters and
+preserve the edges, whilst others do some sort of the opposite.

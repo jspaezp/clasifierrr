@@ -110,3 +110,36 @@ test_that("DOG filters gets calculated correctly on image imput", {
     expect_equal(compiled_dog(fft_img), compiled_dog(img))
 
 })
+
+
+test_that("DoG filter computes the equivalent to subtracting gaussian blurs", {
+    shapes = readImage(system.file('images', 'shapes.png', package='EBImage'))
+    logo = shapes[110:512,1:130]
+
+
+    #display(dog_filter(logo, 11, ratio = 3)[50:100,], "raster")
+    #display(gblur(logo, 0.25)[50:100,] - gblur(logo, 0.75)[50:100,], "raster")
+
+    rmse <- function(img_x, img_y) {
+        sqrt(mean((as.numeric(img_x) - as.numeric(img_y))^2))
+    }
+
+    rmse_1 <- rmse(
+        dog_filter(logo, 11, ratio = 2),
+        gblur(logo, 0.375) -
+            gblur(logo, 0.75))
+
+    expect_lt(rmse_1, 0.01)
+
+    #display(dog_filter(logo, 11, ratio = 7.5), "raster")
+    #display(gblur(logo, 0.1, radius = 11) -
+    #            gblur(logo, 0.75, radius = 11), "raster")
+
+    rmse_2 <- rmse(
+        dog_filter(logo, 11, ratio = 7.5),
+        gblur(logo, 0.1) -
+            gblur(logo, 0.75))
+
+    expect_lt(rmse_2, 0.01)
+
+})
