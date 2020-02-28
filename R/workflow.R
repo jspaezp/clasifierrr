@@ -295,6 +295,53 @@ test_build_train_multi <- function() {
 }
 
 
+highlight_category <- function(class_mat, class_highlight = NULL) {
+    classifier_discrete <- inherits(
+        class_mat,
+        c("factor", "character"))
+
+
+    if (classifier_discrete) {
+        unique_vals <- unique(class_mat)
+        if (length(unique_vals) != 2) {
+            warning("The classification had {", length(unique_vals),
+                    "} distinct values as an output, ",
+                    "make sure that is what you want")
+        }
+
+        if (!is.null(class_highlight)) {
+            if (!class_highlight %in% unique_vals) {
+                warning(
+                    "{", class_highlight, "}",
+                    " was not found in the predicted matrix",
+                    " will just use the first one found {",
+                    unique(class_mat)[[1]],
+                    "}\n")
+                class_highlight <- unique(class_mat)[[1]]
+            }
+            class_mat <- as.numeric(class_mat == class_highlight)
+        }
+    } else {
+        if (!is.null(class_highlight)) {
+            warning("The output classifier is not discrete so",
+                    " the provided 'class_highlight' variable {",
+                    class_highlight, "} will be dissregarded\n")
+        }
+    }
+
+    class_mat <- as.numeric(class_mat)
+    if (max(class_mat) > 1 | min(class_mat) < 0) {
+        warning("Found in the final classification {",
+                sum(class_mat > 1), "} values more than 1 and {",
+                sum(class_mat < 0), "} values less than 0, ",
+                "This might be undesired in the final image and lead",
+                " to inconsistencies\n")
+    }
+    return(class_mat)
+}
+
+
+
 
 #' Classify Images
 #'
@@ -370,79 +417,79 @@ classify_img <- function(classifier, path = NULL, img = NULL,
         attr(time_taken, "units"),
         "to predict the image"))
 
-    classifier_discrete <- inherits(
-        pred_mat,
-        c("factor", "character"))
-
-
-    if (classifier_discrete) {
-        unique_vals <- unique(pred_mat)
-        if (length(unique_vals) != 2) {
-            warning("The classification had {", length(unique_vals),
-                    "} distinct values as an output, ",
-                    "make sure that is what you want")
-        }
-
-        if (!is.null(class_highlight)) {
-            if (!class_highlight %in% unique_vals) {
-                warning(
-                    "{", class_highlight, "}",
-                    " was not found in the predicted matrix",
-                    " will just use the first one found {",
-                    unique(pred_mat)[[1]],
-                    "}\n")
-                class_highlight <- unique(pred_mat)[[1]]
-            }
-            pred_mat <- as.numeric(pred_mat == class_highlight)
-        }
-    } else {
-        if (!is.null(class_highlight)) {
-            warning("The output classifier is not discrete so",
-                    " the provided 'class_highlight' variable {",
-                    class_highlight, "} will be dissregarded\n")
-        }
-    }
-
-    pred_mat <- as.numeric(pred_mat)
-    if (max(pred_mat) > 1 | min(pred_mat) < 0) {
-        warning("Found in the final classification {",
-                sum(pred_mat > 1), "} values more than 1 and {",
-                sum(pred_mat < 0), "} values less than 0, ",
-                "This might be undesired in the final image and lead",
-                " to inconsistencies\n")
-    }
+    pred_mat <- highlight_category(pred_mat, class_highlight)
     out_img <- EBImage::Image(pred_mat, dim = dims)
     return(out_img)
 }
 
+
+
+
+#' A wrapper that handles classifier models to output images
+#'
+#' It is a fairly thin wrapper arround `predict`.
+#'
+#' @title predict_img: Classify pixels based on models and features
+#' @param x model to use for classification
+#' @param feature_frame a data frame with the features
+#' @param ... Additional arguments, passed to `predict`
+#' @examples
+#'
+#' @rdname predict_img
+#' @export predict_img
 predict_img <- function(x, ...) {
     UseMethod("predict_img")
 }
 
-predict_img.glm <- function(x, feature_frame) {
-    prediction <- predict(x, feature_frame, type = "response")
+
+#' @return \code{NULL}
+#'
+#' @rdname predict_img
+#' @method predict_img glm
+predict_img.glm <- function(x, feature_frame, ...) {
+    prediction <- predict(x, feature_frame, type = "response", ...)
     return(prediction)
 }
 
-predict_img.ranger <- function(x, feature_frame) {
-    prediction <- ranger:::predict.ranger(x, data = feature_frame)
+
+#' @return \code{NULL}
+#'
+#' @rdname predict_img
+#' @method predict_img ranger
+predict_img.ranger <- function(x, feature_frame, ...) {
+    prediction <- ranger:::predict.ranger(x, data = feature_frame, ...)
     pred_mat <- prediction$predictions
     return(pred_mat)
 }
 
-predict_img.ksvm <- function(x, feature_frame) {
-    prediction <- kernlab::predict(x, feature_frame)
+
+#' @return \code{NULL}
+#'
+#' @rdname predict_img
+#' @method predict_img ksvm
+predict_img.ksvm <- function(x, feature_frame, ...) {
+    prediction <- kernlab::predict(x, feature_frame, ...)
     return(prediction)
 }
 
 
-predict_img.default <- function(x, feature_frame) {
-    prediction <- predict(x, feature_frame)
+#' @return \code{NULL}
+#'
+#' @rdname predict_img
+#' @method predict_img default
+predict_img.default <- function(x, feature_frame, ...) {
+    prediction <- predict(x, feature_frame, ...)
     return(prediction)
 }
 
-predict_img.glmnet <- function(x, feature_frame) {
-    predict_img.default(x, as.matrix(feature_frame))
+
+#' @return \code{NULL}
+#'
+#' @rdname predict_img
+#' @method predict_img glmnet
+predict_img.glmnet <- function(x, feature_frame, ...) {
+    prediction <- predict_img.default(x, as.matrix(feature_frame), ...)
+    return(prediction)
 }
 
 

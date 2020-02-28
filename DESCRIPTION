@@ -15,7 +15,8 @@ Imports:
     tibble,
     reshape2,
     furrr,
-    fftwtools
+    fftwtools,
+    viridisLite
 Suggests: 
     ranger,
     testthat (>= 2.1.0),
