@@ -234,6 +234,99 @@ compile_dog_filter <- function(width, dim_img,
     return(.filter)
 }
 
+donut_kernell <- function(width, tolerance) {
+    tw <- tolerance + width
+    if (tw %% 2 == 0) {
+        tw <- tw + 1
+    }
+    mat <- matrix(rep(0, tw*tw),  nrow = tw)
+    x <- EBImage::drawCircle(
+        mat,
+        radius = width %/% 2,
+        x = (tw %/% 2),
+        y = (tw %/% 2),
+        col = 1)
+    kernell <- EBImage::dilate(x, EBImage::makeBrush(tolerance, "disc"))
+    kernell <- kernell/sum(kernell)
+
+    return(kernell)
+}
+
+
+#' Calculates a circular hough transform
+#'
+#' This transform accentuates circular shapes
+#'
+#' @param img image to transform
+#' @param width expected width of the circles
+#' @param sobel_width width of the sobel filter that will be used to detect the edges
+#'
+#' @return image
+#' @export
+#'
+#' @examples
+#' @importFrom EBImage dilate makeBrush filter2
+circular_hough <- function(img, width, sobel_width, tolerance = 5) {
+    kernell <- donut_kernell(width, tolerance)
+    trans <- sobel_filter(img, sobel_width)
+    trans <- trans > 0.5
+    trans <- EBImage::filter2(trans, kernell, boundary = 0)
+    trans <- EBImage::filter2(trans, makeBrush(11, "disc"), boundary = 0)
+    return(trans)
+}
+
+#' @export
+compile_circular_hough <- function(width, sobel_width, dim_img, tolerance = 5) {
+    # This would be the sigma for the largest ...
+    compiled_sobel <- compile_sobel_filter(sobel_width, dim_img)
+    donut_kern <- donut_kernell(width, tolerance)
+    fun_hough_circular <- prep_filter.filter(donut_kern, dim_img)
+
+    .filter <- function(img) {
+        hough_img <- fun_hough_circular(compiled_sobel(img))
+        return(hough_img)
+    }
+
+    return(.filter)
+}
+
+
+hough_circles <- function(img,
+                          radii = seq(from = 51, to = 601, by = 20),
+                          sobel_width = 5,
+                          quantile_draw = 0.9,
+                          tolerance = 21) {
+    # TECHNICALLY SPEAKING, this would be the diameter ...
+    radii <- as.integer(radii)
+    radii[radii %% 2 == 0] <- radii[radii %% 2 == 0] + 1
+
+    maxpoint <- purrr::map_dbl(
+        radii,
+        ~ max(circular_hough(img, .x, sobel_width = sobel_width,
+                             tolerance = tolerance)))
+
+
+    # Normalization is no longer required due to a change in the weighting
+    # kernell (donut)
+    norm_max <- maxpoint
+
+    best_radius <- radii[which.max(norm_max)]
+    message("Selecting ", best_radius, " as the best radius for the circles")
+
+    hough_trans <- circular_hough(
+        img, best_radius,
+        sobel_width, tolerance = tolerance)
+
+    near_max_vals <- hough_trans > quantile_draw * max(hough_trans)
+    hough_trans[] <- as.numeric(near_max_vals)
+
+    x <- dilate(hough_trans, makeBrush(best_radius, "disc"))
+
+    return(x)
+}
+
+
+
 # TODO things to consider ...
 # change the back-end in all functions to the pre-compilation.
 # This would allow as well to automatically accept fourier transformed objects.

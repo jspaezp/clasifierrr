@@ -7,6 +7,8 @@
 #' @param img an imput image or matrix
 #' @param filter_widths a numeric vector of odd numbers to be used as the
 #'     width of the feature filters
+#' @param shape_sizes a numeric vector of odd numbers indicating the expected
+#'     size of the shapes to be found
 #' @param verbose wether to display progress messages
 #'
 #' @return data.frame
@@ -27,6 +29,7 @@
 #' @importFrom furrr future_map future_map_dfc
 #' @importFrom EBImage Image makeBrush filter2
 calc_features <- function(img, filter_widths = c(3,5,11,23),
+                          shape_sizes = c(51, 101, 151, 201, 251),
                           verbose = FALSE){
     start_time <- Sys.time()
     if (verbose) message(
@@ -39,7 +42,10 @@ calc_features <- function(img, filter_widths = c(3,5,11,23),
     img_fft <- fftwtools::fftw2d(img)
     filter_widths <- sort(filter_widths)
 
-    feature_functions <- compile_calc_features(filter_widths = filter_widths, dim(img))
+    feature_functions <- compile_calc_features(
+        filter_widths = filter_widths,
+        shape_sizes = shape_sizes,
+        img_dim = dim(img))
 
     bound_flat <- furrr::future_map_dfc(
         feature_functions,
@@ -64,7 +70,11 @@ calc_features <- function(img, filter_widths = c(3,5,11,23),
 
 #' @describeIn calc_features returns a named list of functions that can be applied to an image
 #' @export
-compile_calc_features <- function(filter_widths = c(3,5,11,23), img_dim, verbose = FALSE) {
+compile_calc_features <- function(
+    filter_widths = c(3,5,11,23),
+    shape_sizes = c(51, 101, 151, 201, 251),
+    img_dim,
+    verbose = FALSE) {
 
     start_time <- Sys.time()
     if (verbose) message("Starting to compile features filters for image of dims {",
@@ -104,7 +114,14 @@ compile_calc_features <- function(filter_widths = c(3,5,11,23), img_dim, verbose
 
     names(v_funs) <-  paste0("var_filt_", filter_widths)
 
-    ret_funs <- c(g_funs, dog_funs, v_funs, sobel_funs)
+    trans_funs <- purrr::map(
+        shape_sizes,
+        ~ compile_circular_hough(.x, 3, img_dim)
+    )
+
+    names(trans_funs) <- paste0("c_hough_trans_", shape_sizes)
+
+    ret_funs <- c(g_funs, dog_funs, v_funs, sobel_funs, trans_funs)
 
     time_taken <- Sys.time() - start_time
 

@@ -230,7 +230,9 @@ build_train_multi <- function(imgs_df,
                               train_size_each = 50000,
                               preprocess_fun_img = NULL,
                               preprocess_fun_mask = NULL,
-                              filter_widths = c(3, 5, 15, 31)) {
+                              filter_widths = c(3, 5, 15, 31),
+                              shape_sizes = c(51, 101, 151, 201, 251)
+                              ) {
 
     if (is.null(preprocess_fun_mask)) {
         preprocess_fun_mask = (function(x){x})
@@ -249,7 +251,8 @@ build_train_multi <- function(imgs_df,
         ~ build_train(
           feat_img = calc_features(
               preprocess_fun_img(readImageBw(.x)),
-              filter_widths = filter_widths),
+              filter_widths = filter_widths,
+              shape_sizes = shape_sizes),
           pixel_classes = .y,
           train_size = train_size_each)
     )
@@ -458,15 +461,19 @@ predict_img.glmnet <- function(x, feature_frame) {
 #' myimg <- readImageBw(myfile)
 #' myfeat <- calc_features(myimg, c(3,5))
 #' display_filters(myfeat, dim(myimg))
+#' @importFrom EBImage normalize combine Image
 display_filters <- function(feature_df, dims, scale = FALSE) {
-
-    if (scale) {
-        feature_df <- lapply(feature_df, function(...) { scale(...) + 0.5 } )
-    }
 
     image_full_list <- purrr::map(
         names(feature_df),
         ~ EBImage::Image(feature_df[[.x]], dims))
+
+    if (scale) {
+        image_full_list <- lapply(
+            image_full_list,
+            function(...) { EBImage::normalize(...) } )
+    }
+
     comb_img <- EBImage::combine(image_full_list)
     EBImage::display(
         comb_img,

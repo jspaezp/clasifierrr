@@ -31,7 +31,10 @@ So it converts an image of heigh y and length x into a data frame of `x * y`
 number of rows and one column per feature.
 
 ```{r}
-feature_df <- calc_features(base_image, filter_widths = c(3, 15, 31))
+feature_df <- calc_features(
+    base_image, 
+    filter_widths = c(3, 15, 31),
+    shape_sizes = c(101, 201, 301, 551))
 head(feature_df)
 ```
 

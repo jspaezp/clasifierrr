@@ -2,7 +2,9 @@ test_that("filter calculation with template works", {
   base_image <- readImageBw(system.file(
               "extdata", "tiny_4T1-shNT-1.png",
               package = "clasifierrr"))
-  features <- calc_features(base_image, filter_widths = c(3,5))
+  features <- calc_features(
+      base_image, filter_widths = c(3,5),
+      shape_sizes = c(15, 31, 51))
   expect_gt(length(dim(features)), 1)
 })
 
@@ -20,6 +22,8 @@ test_that("muti image feature calculation works", {
           "extdata", "tiny_4T1-shNT-1.png",
           package = "clasifierrr")
   )
-  trainset <- build_train_multi(params_df, filter_widths = c(3,5))
+  trainset <- build_train_multi(
+      params_df, filter_widths = c(3,5),
+      shape_sizes = c(15, 31, 51))
   expect_gt(length(dim(trainset)), 1)
 })
