@@ -35,6 +35,8 @@ to train a neural network.
 clasifierrr takes care of those cases, where small datasets are used to build
 a clasification algorithm and allow the user to deploy it on many images.
 
+Feel free to take a look at the documentation in the form of a website at 
+![jspaezp.github.io/clasifierrr/](https://jspaezp.github.io/clasifierrr/)
 
 ## Installation
 

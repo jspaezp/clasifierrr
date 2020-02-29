@@ -25,6 +25,10 @@ clasifierrr takes care of those cases, where small datasets are used to
 build a clasification algorithm and allow the user to deploy it on many
 images.
 
+Feel free to take a look at the documentation in the form of a website
+at
+![jspaezp.github.io/clasifierrr/](https://jspaezp.github.io/clasifierrr/)
+
 ## Installation
 
 ``` r
@@ -68,8 +72,8 @@ params_df
 #> # A tibble: 2 x 3
 #>   file                              classif  related_file                       
 #>   <chr>                             <chr>    <chr>                              
-#> 1 /tmp/RtmpskBOn7/temp_libpathe09c… spheroid /tmp/RtmpskBOn7/temp_libpathe09c53…
-#> 2 /tmp/RtmpskBOn7/temp_libpathe09c… bg       /tmp/RtmpskBOn7/temp_libpathe09c53…
+#> 1 /tmp/RtmpKz2FgQ/temp_libpath25f4… spheroid /tmp/RtmpKz2FgQ/temp_libpath25f46d…
+#> 2 /tmp/RtmpKz2FgQ/temp_libpath25f4… bg       /tmp/RtmpKz2FgQ/temp_libpath25f46d…
 ```
 
 ### Form of the classifier files
@@ -144,29 +148,29 @@ trainset <- build_train_multi(
   params_df, 
   filter_widths = c(3,5),
   shape_sizes = c(201, 501))
-#> Returning for file:  /tmp/RtmpskBOn7/temp_libpathe09c5353558e/clasifierrr/extdata/4T1-shNT-1_layer1.png and classification" spheroid " a total of { 108470 } positive pixels
-#> Returning for file:  /tmp/RtmpskBOn7/temp_libpathe09c5353558e/clasifierrr/extdata/4T1-shNT-1_layer2.png and classification" bg " a total of { 205401 } positive pixels
-#> Classified objects are of classes {bg: 32737} and {spheroid: 17263}
+#> Returning for file:  /tmp/RtmpKz2FgQ/temp_libpath25f46de7b226/clasifierrr/extdata/4T1-shNT-1_layer1.png and classification" spheroid " a total of { 108470 } positive pixels
+#> Returning for file:  /tmp/RtmpKz2FgQ/temp_libpath25f46de7b226/clasifierrr/extdata/4T1-shNT-1_layer2.png and classification" bg " a total of { 205401 } positive pixels
+#> Classified objects are of classes {bg: 32591} and {spheroid: 17409}
 #> Returning a data frame of 50000 rows and 11 columns
 head(trainset)
-#>   gauss_filt_3 gauss_filt_5    DoG_filt_3    DoG_filt_5    var_filt_3
-#> 1   0.54901961   0.54756148 -2.389017e-10 -1.458124e-03  3.499762e-05
-#> 2   0.04313725   0.04313725 -5.965905e-18 -9.107298e-18 -1.084202e-19
-#> 3   0.04313726   0.04416861  1.791762e-10  1.031358e-03  2.510378e-06
-#> 4   0.05098039   0.05210003  1.791762e-10  1.119641e-03  3.206533e-06
-#> 5   0.52156863   0.51723076 -6.569796e-10 -4.337863e-03  2.677033e-05
-#> 6   0.52156863   0.52137713 -5.972548e-11 -1.914968e-04  4.103096e-05
-#>      var_filt_5 sobel_filt_3 sobel_filt_5 c_hough_trans_201 c_hough_trans_501
-#> 1  7.379485e-05 9.028129e-02 2.923345e-01     -2.224892e-17      0.0638463874
-#> 2 -4.607859e-19 6.305576e-16 1.491817e-16      7.401487e-17      0.9950793330
-#> 3  3.535391e-06 1.240109e-02 1.240109e-02     -1.850372e-17      0.9181997043
-#> 4  3.083711e-06 1.240109e-02 2.630668e-02     -5.551115e-17      0.9977565476
-#> 5  5.778346e-05 4.960436e-02 2.850632e-01     -3.688827e-17      0.0007445788
-#> 6  1.044161e-04 3.230478e-01 1.090203e+00      2.814550e-17      0.1617958842
+#>   gauss_filt_3 gauss_filt_5    DoG_filt_3    DoG_filt_5   var_filt_3
+#> 1   0.28627451   0.28094544 -7.764304e-10 -0.0053290695 2.905077e-04
+#> 2   0.59215686   0.59071082 -2.389017e-10 -0.0014460387 2.921742e-05
+#> 3   0.48235294   0.48320359  1.194508e-10  0.0008506473 4.830895e-05
+#> 4   0.04313725   0.04351016  5.972540e-11  0.0003729058 1.750936e-06
+#> 5   0.59607843   0.59372736 -3.583525e-10 -0.0023510696 7.324396e-05
+#> 6   0.65882353   0.65937322  5.972532e-11  0.0005496918 4.185369e-05
+#>     var_filt_5 sobel_filt_3 sobel_filt_5 c_hough_trans_201 c_hough_trans_501
+#> 1 8.137227e-04   0.40042269  1.069546286     -6.735380e-17      1.176725e-01
+#> 2 1.176958e-04   0.04471276  0.248052778      7.896517e-17      6.316173e-04
+#> 3 9.448909e-05   0.11008368  0.454445342      4.627803e-17      1.096233e-01
+#> 4 1.922960e-06   0.01240109  0.005545936      6.155310e-03      9.999985e-01
+#> 5 1.765138e-04   0.09444388  0.344406616      6.778361e-17     -2.793893e-17
+#> 6 9.542400e-05   0.08680762  0.248331611      3.521661e-01      3.577437e-02
 #>   pixel_class
-#> 1          bg
-#> 2    spheroid
-#> 3    spheroid
+#> 1    spheroid
+#> 2          bg
+#> 3          bg
 #> 4    spheroid
 #> 5          bg
 #> 6          bg
@@ -199,7 +203,7 @@ classifier
 #> Target node size:                 5 
 #> Variable importance mode:         impurity 
 #> Splitrule:                        gini 
-#> OOB prediction error:             0.34 %
+#> OOB prediction error:             0.39 %
 ```
 
 If the classifier was trained using `importance = "impurity"`, you can
@@ -208,11 +212,11 @@ ask it to give you the relative importance of the variables used.
 ``` r
 sort(ranger::importance(classifier), decreasing = TRUE)
 #> c_hough_trans_501      gauss_filt_3      gauss_filt_5        var_filt_5 
-#>        6397.61367        5038.73699        4324.03584        2931.67772 
+#>        8305.93737        4801.83477        3832.46816        2447.06453 
 #>        var_filt_3      sobel_filt_5      sobel_filt_3 c_hough_trans_201 
-#>        1586.17721        1069.13067         921.71166         107.82426 
-#>        DoG_filt_3        DoG_filt_5 
-#>          96.61463          86.87910
+#>        1861.87359         671.06012         438.10366         128.73146 
+#>        DoG_filt_5        DoG_filt_3 
+#>          99.04194          66.01028
 ```
 
 ### Using the classifier on an image
@@ -240,7 +244,7 @@ class_img <- classify_img(
     shape_sizes = c(201, 501),
     class_highlight = "spheroid")
 #> Starting classification
-#> Took  10.45   secs  to predict the image
+#> Took  8.423   secs  to predict the image
 display(class_img, method = "raster")
 ```
 
@@ -256,8 +260,8 @@ class_img <- classify_img(
   shape_sizes = c(201, 501))
 #> Attempting to calculate features
 #> Starting classification
-#> Took  9.574   secs  to predict the image
-#> Warning in highlight_category(pred_mat, class_highlight): Found in the final classification {307737} values more than 1 and {0} values less than 0, This might be undesired in the final image and lead to inconsistencies
+#> Took  8.445   secs  to predict the image
+#> Warning in highlight_category(pred_mat, class_highlight): Found in the final classification {311637} values more than 1 and {0} values less than 0, This might be undesired in the final image and lead to inconsistencies
 # display(colorLabels(class_img), method = "raster")
 ```
 
@@ -272,10 +276,10 @@ class_img <- classify_img(
   filter_widths = c(3,5), 
   shape_sizes = c(201, 501),
   class_highlight = "spheroid")
-#> Attempting to read image from file: /tmp/RtmpskBOn7/temp_libpathe09c5353558e/clasifierrr/extdata/4T1-shNT-1.png
+#> Attempting to read image from file: /tmp/RtmpKz2FgQ/temp_libpath25f46de7b226/clasifierrr/extdata/4T1-shNT-1.png
 #> Attempting to calculate features
 #> Starting classification
-#> Took  10.61   secs  to predict the image
+#> Took  8.499   secs  to predict the image
 
 # display(class_img, method = "raster")
 ```
@@ -300,7 +304,7 @@ display(filt_class_img, method = "raster")
 table(filt_class_img)
 #> filt_class_img
 #>      0      1 
-#> 480266 306166
+#> 475968 310464
 filt_class_img
 #> Image 
 #>   colorMode    : Grayscale 

@@ -121,8 +121,8 @@ compile_calc_features <- function(
     trans_funs <- purrr::map(
         shape_sizes,
         ~ compile_hough_circle_draw(
-            width = .x, sobel_width = 3,
-            dim_img = img_dim, tolerance = 11,
+            width = .x, sobel_width = 5,
+            dim_img = img_dim, tolerance = 15,
             pct_max = 0.95, blurr = 1/8)
     )
 
