@@ -16,10 +16,14 @@
 #'
 #' @examples
 #' test_image <- matrix(runif(10201), 101)
-#' feature_df <- calc_features(test_image, c(3,5))
+#' feature_df <- calc_features(
+#'     test_image, filter_widths = c(3,5),
+#'     shape_sizes = c(11, 21))
 #' head(feature_df)
 #'
-#' feature_funs <- compile_calc_features(filter_widths = c(3,5), dim(test_image))
+#' feature_funs <- compile_calc_features(
+#'      filter_widths = c(3,5), shape_sizes = c(11, 21),
+#'      dim(test_image))
 #' feature_funs[[1]](test_image)
 #'
 #' feature_df2 <- purrr::map_dfc(feature_funs, ~ as.numeric(.x(test_image)))
@@ -117,7 +121,7 @@ compile_calc_features <- function(
     trans_funs <- purrr::map(
         shape_sizes,
         ~ compile_hough_circle_draw(
-            width = .x,sobel_width = 3,
+            width = .x, sobel_width = 3,
             dim_img = img_dim, tolerance = 11,
             pct_max = 0.95, blurr = 1/8)
     )

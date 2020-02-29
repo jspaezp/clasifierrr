@@ -19,3 +19,12 @@ list of 2 images, one with the averaged colors and one with the indexes
 \description{
 Performs a variation of kmeans to make virtual pixels.
 }
+\examples{
+x = readImage(system.file('images', 'shapes.png', package='EBImage'))
+superpixelated <- slic(x)
+
+# # To display the average color of each superpixel
+display(superpixelated[[1]], "raster")
+# # To display a colored version that makes evident the superpixel separations
+display(EBImage::colorLabels(superpixelated[[2]]), "raster")
+}

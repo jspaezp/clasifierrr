@@ -225,7 +225,7 @@ build_train <- function(feat_img, pixel_classes, train_size = 50000) {
 #' trainset <- build_train_multi(
 #'     params_df,
 #'     train_size_each = 5000,
-#'     filter_widths = c(3,5))
+#'     filter_widths = c(3,5), shape_sizes = c(21, 51))
 build_train_multi <- function(imgs_df,
                               train_size_each = 50000,
                               preprocess_fun_img = NULL,
@@ -375,15 +375,17 @@ highlight_category <- function(class_mat, class_highlight = NULL) {
 #'         "extdata", "tiny_4T1-shNT-1.png",
 #'         package = "clasifierrr")
 #'     )
-#' trainset <- build_train_multi(params_df, filter_widths = c(3, 5, 15))
+#' trainset <- build_train_multi(
+#'     params_df, filter_widths = c(3, 5, 15),
+#'     shape_sizes = c(21, 51))
 #' trainset$pixel_class <- trainset$pixel_class == "spheroid"
 #' model_simple_glm <- glm(pixel_class~.,data = trainset, family = binomial(link = "logit"))
 #' class_img <- classify_img(
 #'     model_simple_glm, path = params_df[[3]][[1]],
-#'     filter_widths = c(3, 5, 15))
+#'     filter_widths = c(3, 5, 15), shape_sizes = c(21, 51))
 #' # plot(as.raster(class_img))
 classify_img <- function(classifier, path = NULL, img = NULL,
-                         feature_frame = NULL, filter_widths = NULL,
+                         feature_frame = NULL, filter_widths, shape_sizes,
                          class_highlight = NULL,
                          dims = NULL, preprocess_fun_img = NULL){
 
@@ -400,7 +402,9 @@ classify_img <- function(classifier, path = NULL, img = NULL,
     if (is.null(feature_frame)) {
         message("Attempting to calculate features")
         stopifnot(!is.null(filter_widths))
-        feature_frame <- calc_features(img, filter_widths = filter_widths)
+        feature_frame <- calc_features(
+            img, filter_widths = filter_widths,
+            shape_sizes = shape_sizes)
         dims <- dim(img)
     }
 
@@ -506,8 +510,8 @@ predict_img.glmnet <- function(x, feature_frame, ...) {
 #' @examples
 #' myfile <- system.file("extdata", "4T1-shNT-1.png", package = "clasifierrr")
 #' myimg <- readImageBw(myfile)
-#' myfeat <- calc_features(myimg, c(3,5))
-#' display_filters(myfeat, dim(myimg))
+#' myfeat <- calc_features(myimg, c(3,5), shape_sizes = c(51, 501))
+#' display_filters(myfeat, dim(myimg), scale = TRUE)
 #' @importFrom EBImage normalize combine Image
 display_filters <- function(feature_df, dims, scale = FALSE) {
 

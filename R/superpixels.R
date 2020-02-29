@@ -12,6 +12,13 @@
 #' @export
 #'
 #' @examples
+#' x = readImage(system.file('images', 'shapes.png', package='EBImage'))
+#' superpixelated <- slic(x)
+#'
+#' # # To display the average color of each superpixel
+#' display(superpixelated[[1]], "raster")
+#' # # To display a colored version that makes evident the superpixel separations
+#' display(EBImage::colorLabels(superpixelated[[2]]), "raster")
 slic <- function(img, num_superpixel = 200, compactness = 1) {
     # Assuming a 2d image on grayscale
     scaling_spatial <- max(dim(img)*0.28)

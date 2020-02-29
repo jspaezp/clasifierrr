@@ -20,6 +20,8 @@
 
 #' @describeIn filter2.prepared precomputes image to handle borders, returns an image
 #'             with attributes
+#' @export
+#' @keywords internal
 prep_filter.img <- function(x, filter_dims,
                             boundary = c("circular", "replicate"),
                             val = NULL) {
@@ -106,6 +108,8 @@ prep_filter.img <- function(x, filter_dims,
 
 #' @describeIn filter2.prepared precomputes the filter to be applied and returns a function,
 #'             requires the dimensions of the post-processed image.
+#' @keywords internal
+#' @export
 prep_filter.filter <- function(filter, dim_x_proc) {
   # in retrospect ... having this one separate is handy for functional
   # programming and job dispatchment but not really time efficient per-se,

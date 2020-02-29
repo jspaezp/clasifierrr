@@ -4,18 +4,27 @@
 \alias{generate_edges}
 \title{Generate an edge image of a mask, based on an image}
 \usage{
-generate_edges(img, mask, opac = c(1, 0.8), cols = c("#FDE725FF", "#440154FF"))
+generate_edges(img, mask, opac = c(1, 0.2), cols = c("#440154FF", "#FDE725FF"))
 }
 \arguments{
 \item{img}{image}
 
 \item{mask}{mask}
 
-\item{opac}{}
+\item{opac}{numeric vector o length 2 with the opacity of the overlaid colours}
+
+\item{cols}{color of the outline and fill that will be used}
 }
 \value{
 
 }
 \description{
 Generate an edge image of a mask, based on an image
+}
+\examples{
+x = readImage(system.file('images', 'shapes.png', package='EBImage'))
+sobel <- sobel_filter(x)
+edges <- generate_edges(x, sobel < 0.5)
+display(edges, "raster")
+display(generate_edges(x, EBImage::fillHull(sobel > 0.5)), "raster")
 }

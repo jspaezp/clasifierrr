@@ -18,7 +18,7 @@ calc_sobel_kern <- function(width) {
               seq(from = (width - 1)/2, to = 1, by = -1))
 
     m <- matrix(c(
-        -part, rep(rep(0, length(part)), width -2),
+        -part, rep(rep(0, length(part)), width - 2),
         part),
         ncol = width,
         byrow = TRUE)
@@ -246,8 +246,10 @@ donut_kernell <- function(width, tolerance) {
         x = (tw %/% 2),
         y = (tw %/% 2),
         col = 1)
-    kernell <- EBImage::dilate(x, EBImage::makeBrush(tolerance, "disc"))
-    kernell <- kernell/sum(kernell)
+    if (tolerance != 0) {
+        x <- EBImage::dilate(x, EBImage::makeBrush(tolerance, "disc"))
+    }
+    kernell <- x/sum(x)
 
     return(kernell)
 }
@@ -266,13 +268,18 @@ donut_kernell <- function(width, tolerance) {
 #' @family filters
 #'
 #' @examples
+#' x = readImage(system.file('images', 'shapes.png', package='EBImage'))
+#' hough <- circular_hough_transform(x, 51, 3, 5)
+#' # display(normalize(hough))
 #' @importFrom EBImage dilate makeBrush filter2
 circular_hough_transform <- function(img, width, sobel_width, tolerance = 11) {
     kernell <- donut_kernell(width, tolerance)
-    trans <- sobel_filter(img, sobel_width)
+    trans <- EBImage::medianFilter(img, 3)
+    trans <- sobel_filter(trans, sobel_width)
+    trans <- clean_image_border(trans, sobel_width)
     trans <- trans > 0.5
     trans <- EBImage::filter2(trans, kernell, boundary = 0)
-    trans <- EBImage::filter2(trans, makeBrush(11, "disc"), boundary = 0)
+    trans <- EBImage::filter2(trans, makeBrush(tolerance, "disc"), boundary = 0)
     return(trans)
 }
 
@@ -285,14 +292,22 @@ compile_circular_hough <- function(width, sobel_width, dim_img, tolerance = 11) 
     fun_hough_circular <- prep_filter.filter(donut_kern, dim_img)
 
     .filter <- function(img) {
+        if (is.complex(img)) {
+            img <- Re(fftwtools::fftw2d(img, inverse = TRUE)/prod(dim(img)))
+        }
+        img <- EBImage::medianFilter(img, 3)
         img <- compiled_sobel(img)
+        img <- clean_image_border(img, sobel_width)
         img <- img > 0.5
         hough_img <- fun_hough_circular(img)
+        hough_img <- EBImage::filter2(hough_img, makeBrush(tolerance, "disc"), boundary = 0)
+
         return(hough_img)
     }
 
     return(.filter)
 }
+
 
 #' @describeIn hough_circle_draw pre-calculates parameters and returns a function
 #' @export
@@ -333,6 +348,14 @@ compile_hough_circle_draw <- function(width, sobel_width, dim_img,
 #' @family filters
 #'
 #' @examples
+#' x = readImage(system.file('images', 'shapes.png', package='EBImage'))
+#' hough <- hough_circle_draw(x, 51, 3, 3)
+#' # display(hough)
+#' # display(generate_overlay(x, hough > 0.68))
+#' hough <- hough_circle_draw(x, 71, 3, 3, 0.9)
+#' # display(hough)
+#' # display(generate_overlay(x, hough > 0.68))
+#'
 #' @importFrom EBImage gblur makeBrush
 hough_circle_draw <- function(img, width, sobel_width,
                               tolerance, pct_max = 0.95,

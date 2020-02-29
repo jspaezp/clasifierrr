@@ -7,7 +7,7 @@
 generate_overlay(
   img,
   mask,
-  opac = c(1, 0.8),
+  opac = c(1, 0.2),
   cols = c("#FDE725FF", "#440154FF")
 )
 }
@@ -16,11 +16,20 @@ generate_overlay(
 
 \item{mask}{mask}
 
-\item{opac}{}
+\item{opac}{numeric vector o length 2 with the opacity of the overlaid colours}
+
+\item{cols}{color of the outline and fill that will be used}
 }
 \value{
 
 }
 \description{
 Generate an overlaid image of a mask and a base image
+}
+\examples{
+x = readImage(system.file('images', 'shapes.png', package='EBImage'))
+sobel <- sobel_filter(x)
+overlay <- generate_overlay(x, sobel < 0.5)
+display(overlay, "raster")
+display(generate_overlay(x, EBImage::fillHull(sobel > 0.5)), "raster")
 }
