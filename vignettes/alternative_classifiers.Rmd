@@ -16,7 +16,6 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(clasifierrr)
-library(clasifierrr)
 library(EBImage)
 library(ranger)
 library(caret)
@@ -45,12 +44,17 @@ params_df
 ```{r}
 test_img <- readImageBw(params_df$related_file[[1]])
 
-test_feat <- calc_features(test_img, filter_widths = c(3, 5, 15))
+test_feat <- calc_features(test_img,
+  filter_widths = c(3, 5, 15), 
+  shape_sizes = c(71, 101))
 ```
 
 
 ```{r}
-trainset <- build_train_multi(params_df, filter_widths = c(3, 5, 15))
+trainset <- build_train_multi(
+  params_df, 
+  filter_widths = c(3, 5, 15), 
+  shape_sizes = c(71, 101))
 head(trainset, 2)
 ```
 
@@ -77,6 +81,8 @@ suppressWarnings({
 class_img <- classify_img(
       classifier = model_simple_glm, 
       feature_frame = test_feat, 
+      filter_widths = c(3, 5, 15), 
+      shape_sizes = c(71, 101),
       dims = dim(test_img))
 
 display(class_img, method = "raster")

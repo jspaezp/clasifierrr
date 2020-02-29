@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">clasifierrr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
       </span>
     </div>
 
@@ -135,7 +135,8 @@
   <span class='kw'>train_size_each</span> <span class='kw'>=</span> <span class='fl'>50000</span>,
   <span class='kw'>preprocess_fun_img</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>preprocess_fun_mask</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>5</span>, <span class='fl'>15</span>, <span class='fl'>31</span>)
+  <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>5</span>, <span class='fl'>15</span>, <span class='fl'>31</span>),
+  <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>51</span>, <span class='fl'>101</span>, <span class='fl'>151</span>, <span class='fl'>201</span>, <span class='fl'>251</span>)
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -184,8 +185,8 @@
 <span class='no'>trainset</span> <span class='kw'>&lt;-</span> <span class='fu'>build_train_multi</span>(
     <span class='no'>params_df</span>,
     <span class='kw'>train_size_each</span> <span class='kw'>=</span> <span class='fl'>5000</span>,
-    <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>,<span class='fl'>5</span>))</div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/RtmpGL73Jd/temp_libpath5cdbb1af11572/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 8556 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/RtmpGL73Jd/temp_libpath5cdbb1af11572/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 14056 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Classified objects are of classes {bg: 3069} and {spheroid: 1931}</span>
-#&gt; <span class='message'></span></div><div class='output co'>#&gt; <span class='message'>Returning a data frame of 5000 rows and 9 columns</span></div></pre>
+    <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>,<span class='fl'>5</span>), <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>21</span>, <span class='fl'>51</span>))</div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 8556 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 14056 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Classified objects are of classes {bg: 3069} and {spheroid: 1931}</span>
+#&gt; <span class='message'></span></div><div class='output co'>#&gt; <span class='message'>Returning a data frame of 5000 rows and 11 columns</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

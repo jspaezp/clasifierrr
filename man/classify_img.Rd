@@ -9,7 +9,8 @@ classify_img(
   path = NULL,
   img = NULL,
   feature_frame = NULL,
-  filter_widths = NULL,
+  filter_widths,
+  shape_sizes,
   class_highlight = NULL,
   dims = NULL,
   preprocess_fun_img = NULL
@@ -55,11 +56,13 @@ params_df <- tibble::tibble(
         "extdata", "tiny_4T1-shNT-1.png",
         package = "clasifierrr")
     )
-trainset <- build_train_multi(params_df, filter_widths = c(3, 5, 15))
+trainset <- build_train_multi(
+    params_df, filter_widths = c(3, 5, 15),
+    shape_sizes = c(21, 51))
 trainset$pixel_class <- trainset$pixel_class == "spheroid"
 model_simple_glm <- glm(pixel_class~.,data = trainset, family = binomial(link = "logit"))
 class_img <- classify_img(
     model_simple_glm, path = params_df[[3]][[1]],
-    filter_widths = c(3, 5, 15))
+    filter_widths = c(3, 5, 15), shape_sizes = c(21, 51))
 # plot(as.raster(class_img))
 }

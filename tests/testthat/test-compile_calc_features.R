@@ -3,7 +3,8 @@ test_that("Basic functioning of compile_calc_features",{
 
     my_feat_funs <- compile_calc_features(
         filter_widths = c(3,5,7),
-        dim(test_image))
+        shape_sizes = c(15, 31, 51),
+        img_dim = dim(test_image))
 
     expect_named(my_feat_funs)
     expect_type(my_feat_funs[[1]], "closure")
@@ -15,7 +16,8 @@ test_that("compile_calc_features returns usable functions",{
 
     my_feat_funs <- compile_calc_features(
         filter_widths = c(3,5,7),
-        dim(test_image))
+        shape_sizes = c(15, 31, 51),
+        img_dim = dim(test_image))
 
 
     for (i in my_feat_funs) {
@@ -38,7 +40,8 @@ test_that("compile_calc_features returns usable functions on images",{
 
     my_feat_funs <- compile_calc_features(
         filter_widths = c(3,5,7),
-        dim(test_image))
+        shape_sizes = c(15, 31, 51),
+        img_dim = dim(test_image))
 
 
     for (i in my_feat_funs) {

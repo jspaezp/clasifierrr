@@ -57,7 +57,7 @@ display(base_image, method = "raster")
 time_taken_full <- system.time({
     features <- calc_features(
         base_image, 
-        filter_widths = c(3,5))
+        filter_widths = c(3,5), shape_sizes = c(51, 101))
 })
 
 time_taken_full
@@ -82,7 +82,7 @@ shrunk_image <- resize(base_image, w = newsize)
 time_taken_shrunk <- system.time({
     shrunk_features <- calc_features(
         shrunk_image, 
-        filter_widths = c(3,5))
+        filter_widths = c(3,5), shape_sizes = c(15, 31))
 })
 
 time_taken_shrunk
@@ -142,7 +142,7 @@ multi_time_shrunk <- system.time({
         preprocess_fun_img = half_image,
         preprocess_fun_mask = half_image, 
         train_size_each = 5000, 
-        filter_widths = c(3,5))
+        filter_widths = c(3,5), shape_sizes = c(15, 31))
 })
 
 multi_time_full
@@ -179,7 +179,8 @@ multi_time_shrunk <- system.time({
         preprocess_fun_img = preprocess_img,
         preprocess_fun_mask = half_image, 
         train_size_each = 1000, 
-        filter_widths = c(3,5))
+        filter_widths = c(3,5),
+        shape_sizes = c(15, 31))
 })
 ```
 
@@ -193,11 +194,15 @@ system.time({
 for (i in 1:10) {
   features <- calc_features(
     base_image, 
-    filter_widths = c(3,5,7,11,15))
+    filter_widths = c(3,5,7,11,15),
+    shape_sizes = c(15, 31))
 }})
 
 fft_image <- fftwtools::fftw2d(base_image)
-precompiled_filters <- compile_calc_features(c(3,5,7,11,15), dim(base_image))
+precompiled_filters <- compile_calc_features(
+  c(3,5,7,11,15),
+  shape_sizes = c(15, 31),
+  dim(base_image))
 
 system.time({
 for (i in 1:10) {
@@ -227,7 +232,8 @@ plan(multiprocess, workers = 2)
 
 features <- calc_features(
   base_image, 
-  filter_widths = c(3,5,7,11,15))
+  filter_widths = c(3,5,7,11,15),
+  shape_sizes = c(15, 31))
 
 ```
 

@@ -53,23 +53,23 @@ library(ranger)
 params_df <- tibble::tibble(
     file = c(
         system.file(
-            "extdata", "tiny_4T1-shNT-1_layer1.png",
+            "extdata", "4T1-shNT-1_layer1.png",
             package = "clasifierrr"),
         system.file(
-            "extdata", "tiny_4T1-shNT-1_layer2.png",
+            "extdata", "4T1-shNT-1_layer2.png",
             package = "clasifierrr")),
     classif = c("spheroid", "bg"),
     related_file = system.file(
-        "extdata", "tiny_4T1-shNT-1.png",
+        "extdata", "4T1-shNT-1.png",
         package = "clasifierrr")
 )
 
 params_df
 #> # A tibble: 2 x 3
-#>   file                              classif related_file                        
-#>   <chr>                             <chr>   <chr>                               
-#> 1 /home/jspaezp/R/x86_64-redhat-li… sphero… /home/jspaezp/R/x86_64-redhat-linux…
-#> 2 /home/jspaezp/R/x86_64-redhat-li… bg      /home/jspaezp/R/x86_64-redhat-linux…
+#>   file                              classif  related_file                       
+#>   <chr>                             <chr>    <chr>                              
+#> 1 /tmp/RtmpskBOn7/temp_libpathe09c… spheroid /tmp/RtmpskBOn7/temp_libpathe09c53…
+#> 2 /tmp/RtmpskBOn7/temp_libpathe09c… bg       /tmp/RtmpskBOn7/temp_libpathe09c53…
 ```
 
 ### Form of the classifier files
@@ -106,19 +106,22 @@ ODD NUMBERS, also consider that the more filters, the more memmory you
 will need.
 
 ``` r
-features <- calc_features(base_image, filter_widths = c(3,5))
+features <- calc_features(
+  base_image, filter_widths = c(3,5),
+  shape_sizes = c(201, 501))
 #> 
 #> Attaching package: 'purrr'
 #> The following object is masked from 'package:EBImage':
 #> 
 #>     transpose
 head(features, 2)
-#> # A tibble: 2 x 8
+#> # A tibble: 2 x 10
 #>   gauss_filt_3 gauss_filt_5 DoG_filt_3 DoG_filt_5 var_filt_3 var_filt_5
 #>          <dbl>        <dbl>      <dbl>      <dbl>      <dbl>      <dbl>
-#> 1        0.486        0.458   -3.94e-9    -0.0283    0.00420    0.00455
-#> 2        0.490        0.469   -3.05e-9    -0.0209    0.00337    0.00360
-#> # … with 2 more variables: sobel_filt_3 <dbl>, sobel_filt_5 <dbl>
+#> 1        0.478        0.451   -3.76e-9    -0.0275    0.00409    0.00418
+#> 2        0.478        0.457   -3.05e-9    -0.0212    0.00295    0.00347
+#> # … with 4 more variables: sobel_filt_3 <dbl>, sobel_filt_5 <dbl>,
+#> #   c_hough_trans_201 <dbl>, c_hough_trans_501 <dbl>
 ```
 
 Each of the columns can be made to an image
@@ -137,27 +140,36 @@ region you defined in the “classifier files” (the ones that look like
 squigly lines)
 
 ``` r
-trainset <- build_train_multi(params_df, filter_widths = c(3,5))
-#> Returning for file:  /home/jspaezp/R/x86_64-redhat-linux-gnu-library/3.6/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 8556 } positive pixels
-#> Returning for file:  /home/jspaezp/R/x86_64-redhat-linux-gnu-library/3.6/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 14056 } positive pixels
-#> Warning in build_train(feat_img = calc_features(preprocess_fun_img(readImageBw(.x)), : The selected train size(50000) is larger than the number of classified pixels (22567)  so the number is getting updated to the total number of available pixels
-#> Classified objects are of classes {bg: 14056} and {spheroid: 8511}
-#> Returning a data frame of 22567 rows and 9 columns
+trainset <- build_train_multi(
+  params_df, 
+  filter_widths = c(3,5),
+  shape_sizes = c(201, 501))
+#> Returning for file:  /tmp/RtmpskBOn7/temp_libpathe09c5353558e/clasifierrr/extdata/4T1-shNT-1_layer1.png and classification" spheroid " a total of { 108470 } positive pixels
+#> Returning for file:  /tmp/RtmpskBOn7/temp_libpathe09c5353558e/clasifierrr/extdata/4T1-shNT-1_layer2.png and classification" bg " a total of { 205401 } positive pixels
+#> Classified objects are of classes {bg: 32737} and {spheroid: 17263}
+#> Returning a data frame of 50000 rows and 11 columns
 head(trainset)
-#>   gauss_filt_3 gauss_filt_5    DoG_filt_3    DoG_filt_5   var_filt_3
-#> 1   0.51372549   0.51264245 -1.791763e-10 -1.083042e-03 4.577748e-05
-#> 2   0.24705882   0.24500235 -2.986271e-10 -2.056473e-03 4.400544e-05
-#> 3   0.30588235   0.30818717  2.986270e-10  2.304817e-03 2.444412e-03
-#> 4   0.04313725   0.04318191 -5.056285e-18  4.465888e-05 9.282069e-07
-#> 5   0.05098039   0.05018796 -1.194508e-10 -7.924294e-04 3.670636e-06
-#> 6   0.04705882   0.04780730  1.194508e-10  7.484737e-04 1.329023e-06
-#>     var_filt_5 sobel_filt_3 sobel_filt_5 pixel_class
-#> 1 1.792853e-04  0.099826840   0.47496332          bg
-#> 2 1.678721e-04  0.012401089   0.28008347          bg
-#> 3 3.960448e-03  0.094280904   2.45943639          bg
-#> 4 1.624055e-06  0.005545936   0.01240109    spheroid
-#> 5 3.334460e-06  0.005545936   0.01568627    spheroid
-#> 6 1.466299e-06  0.017537788   0.03529412    spheroid
+#>   gauss_filt_3 gauss_filt_5    DoG_filt_3    DoG_filt_5    var_filt_3
+#> 1   0.54901961   0.54756148 -2.389017e-10 -1.458124e-03  3.499762e-05
+#> 2   0.04313725   0.04313725 -5.965905e-18 -9.107298e-18 -1.084202e-19
+#> 3   0.04313726   0.04416861  1.791762e-10  1.031358e-03  2.510378e-06
+#> 4   0.05098039   0.05210003  1.791762e-10  1.119641e-03  3.206533e-06
+#> 5   0.52156863   0.51723076 -6.569796e-10 -4.337863e-03  2.677033e-05
+#> 6   0.52156863   0.52137713 -5.972548e-11 -1.914968e-04  4.103096e-05
+#>      var_filt_5 sobel_filt_3 sobel_filt_5 c_hough_trans_201 c_hough_trans_501
+#> 1  7.379485e-05 9.028129e-02 2.923345e-01     -2.224892e-17      0.0638463874
+#> 2 -4.607859e-19 6.305576e-16 1.491817e-16      7.401487e-17      0.9950793330
+#> 3  3.535391e-06 1.240109e-02 1.240109e-02     -1.850372e-17      0.9181997043
+#> 4  3.083711e-06 1.240109e-02 2.630668e-02     -5.551115e-17      0.9977565476
+#> 5  5.778346e-05 4.960436e-02 2.850632e-01     -3.688827e-17      0.0007445788
+#> 6  1.044161e-04 3.230478e-01 1.090203e+00      2.814550e-17      0.1617958842
+#>   pixel_class
+#> 1          bg
+#> 2    spheroid
+#> 3    spheroid
+#> 4    spheroid
+#> 5          bg
+#> 6          bg
 ```
 
 ### Train a classifier
@@ -181,13 +193,13 @@ classifier
 #> 
 #> Type:                             Classification 
 #> Number of trees:                  100 
-#> Sample size:                      22567 
-#> Number of independent variables:  8 
-#> Mtry:                             2 
+#> Sample size:                      50000 
+#> Number of independent variables:  10 
+#> Mtry:                             3 
 #> Target node size:                 5 
 #> Variable importance mode:         impurity 
 #> Splitrule:                        gini 
-#> OOB prediction error:             1.84 %
+#> OOB prediction error:             0.34 %
 ```
 
 If the classifier was trained using `importance = "impurity"`, you can
@@ -195,10 +207,12 @@ ask it to give you the relative importance of the variables used.
 
 ``` r
 sort(ranger::importance(classifier), decreasing = TRUE)
-#> gauss_filt_3 gauss_filt_5   var_filt_3   var_filt_5 sobel_filt_3 sobel_filt_5 
-#>    2791.7176    2626.9225    1500.1604    1442.9067     936.2210     824.4162 
-#>   DoG_filt_3   DoG_filt_5 
-#>     208.3463     191.6925
+#> c_hough_trans_501      gauss_filt_3      gauss_filt_5        var_filt_5 
+#>        6397.61367        5038.73699        4324.03584        2931.67772 
+#>        var_filt_3      sobel_filt_5      sobel_filt_3 c_hough_trans_201 
+#>        1586.17721        1069.13067         921.71166         107.82426 
+#>        DoG_filt_3        DoG_filt_5 
+#>          96.61463          86.87910
 ```
 
 ### Using the classifier on an image
@@ -211,18 +225,22 @@ It Can be used directly on calculated features …
 ``` r
 # This just reads the image to classify
 test_img <- readImageBw(system.file(
-        "extdata", "tiny_4T1-shNT-1.png",
+        "extdata", "4T1-shNT-1.png",
         package = "clasifierrr"))
 
-test_feat <- calc_features(test_img, filter_widths = c(3,5))
+test_feat <- calc_features(
+  test_img, filter_widths = c(3,5),
+  shape_sizes = c(201, 501))
 
 class_img <- classify_img(
     classifier, 
     feature_frame = test_feat, 
     dims = dim(test_img), 
+    filter_widths = c(3,5),
+    shape_sizes = c(201, 501),
     class_highlight = "spheroid")
 #> Starting classification
-#> Took 0.3735 secs to predict the image
+#> Took  10.45   secs  to predict the image
 display(class_img, method = "raster")
 ```
 
@@ -234,11 +252,12 @@ It can also be used on a raw image …
 class_img <- classify_img(
   classifier, 
   img = test_img, 
-  filter_widths = c(3,5))
+  filter_widths = c(3,5), 
+  shape_sizes = c(201, 501))
 #> Attempting to calculate features
 #> Starting classification
-#> Took 0.4819 secs to predict the image
-#> Warning in classify_img(classifier, img = test_img, filter_widths = c(3, : Found in the final classification {12665} values more than 1 and {0} values less than 0, This might be undesired in the final image and lead to inconsistencies
+#> Took  9.574   secs  to predict the image
+#> Warning in highlight_category(pred_mat, class_highlight): Found in the final classification {307737} values more than 1 and {0} values less than 0, This might be undesired in the final image and lead to inconsistencies
 # display(colorLabels(class_img), method = "raster")
 ```
 
@@ -248,14 +267,15 @@ And as well in a system file
 class_img <- classify_img(
   classifier,
   path = system.file(
-    "extdata", "tiny_4T1-shNT-1.png",
+    "extdata", "4T1-shNT-1.png",
     package = "clasifierrr"),
   filter_widths = c(3,5), 
+  shape_sizes = c(201, 501),
   class_highlight = "spheroid")
-#> Attempting to read image from file/home/jspaezp/R/x86_64-redhat-linux-gnu-library/3.6/clasifierrr/extdata/tiny_4T1-shNT-1.png
+#> Attempting to read image from file: /tmp/RtmpskBOn7/temp_libpathe09c5353558e/clasifierrr/extdata/4T1-shNT-1.png
 #> Attempting to calculate features
 #> Starting classification
-#> Took 0.647 secs to predict the image
+#> Took  10.61   secs  to predict the image
 
 # display(class_img, method = "raster")
 ```
@@ -279,13 +299,13 @@ display(filt_class_img, method = "raster")
 ``` r
 table(filt_class_img)
 #> filt_class_img
-#>     0     1 
-#> 19349 12221
+#>      0      1 
+#> 480266 306166
 filt_class_img
 #> Image 
 #>   colorMode    : Grayscale 
 #>   storage.mode : integer 
-#>   dim          : 205 154 
+#>   dim          : 1024 768 
 #>   frames.total : 1 
 #>   frames.render: 1 
 #> 

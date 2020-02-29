@@ -79,3 +79,4 @@ oldschool_filtered <- EBImage::filter2(img, my_filter)
 all(oldschool_filtered == filtered_img)
 # [1] TRUE
 }
+\keyword{internal}

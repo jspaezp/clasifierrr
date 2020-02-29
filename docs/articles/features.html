@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">clasifierrr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
       </span>
     </div>
 
@@ -99,25 +99,29 @@
 <a class="sourceLine" id="cb2-4" title="4"><span class="kw"><a href="https://rdrr.io/pkg/EBImage/man/display.html">display</a></span>(base_image, <span class="dt">method =</span> <span class="st">"raster"</span>)</a></code></pre></div>
 <p><img src="features_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
 <p>The features are just a series of filters applied to the main image. So it converts an image of heigh y and length x into a data frame of <code>x * y</code> number of rows and one column per feature.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">feature_df &lt;-<span class="st"> </span><span class="kw"><a href="../reference/calc_features.html">calc_features</a></span>(base_image, <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>, <span class="dv">15</span>, <span class="dv">31</span>))</a>
-<a class="sourceLine" id="cb3-2" title="2"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb3-3" title="3"><span class="co">#&gt; Attaching package: 'purrr'</span></a>
-<a class="sourceLine" id="cb3-4" title="4"><span class="co">#&gt; The following object is masked from 'package:EBImage':</span></a>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">feature_df &lt;-<span class="st"> </span><span class="kw"><a href="../reference/calc_features.html">calc_features</a></span>(</a>
+<a class="sourceLine" id="cb3-2" title="2">    base_image, </a>
+<a class="sourceLine" id="cb3-3" title="3">    <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>, <span class="dv">15</span>, <span class="dv">31</span>),</a>
+<a class="sourceLine" id="cb3-4" title="4">    <span class="dt">shape_sizes =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">101</span>, <span class="dv">201</span>, <span class="dv">301</span>, <span class="dv">551</span>))</a>
 <a class="sourceLine" id="cb3-5" title="5"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb3-6" title="6"><span class="co">#&gt;     transpose</span></a>
-<a class="sourceLine" id="cb3-7" title="7"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(feature_df)</a>
-<a class="sourceLine" id="cb3-8" title="8"><span class="co">#&gt; # A tibble: 6 x 12</span></a>
-<a class="sourceLine" id="cb3-9" title="9"><span class="co">#&gt;   gauss_filt_3 gauss_filt_15 gauss_filt_31 DoG_filt_3 DoG_filt_15 DoG_filt_31</span></a>
-<a class="sourceLine" id="cb3-10" title="10"><span class="co">#&gt;          &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;</span></a>
-<a class="sourceLine" id="cb3-11" title="11"><span class="co">#&gt; 1        0.478         0.363         0.352   -3.76e-9     -0.0995     -0.0453</span></a>
-<a class="sourceLine" id="cb3-12" title="12"><span class="co">#&gt; 2        0.478         0.378         0.361   -3.05e-9     -0.0877     -0.0561</span></a>
-<a class="sourceLine" id="cb3-13" title="13"><span class="co">#&gt; 3        0.478         0.388         0.368   -3.23e-9     -0.0771     -0.0493</span></a>
-<a class="sourceLine" id="cb3-14" title="14"><span class="co">#&gt; 4        0.475         0.393         0.376   -3.05e-9     -0.0688     -0.0398</span></a>
-<a class="sourceLine" id="cb3-15" title="15"><span class="co">#&gt; 5        0.475         0.396         0.382   -2.99e-9     -0.0667     -0.0337</span></a>
-<a class="sourceLine" id="cb3-16" title="16"><span class="co">#&gt; 6        0.490         0.397         0.387   -3.76e-9     -0.0777     -0.0321</span></a>
-<a class="sourceLine" id="cb3-17" title="17"><span class="co">#&gt; # … with 6 more variables: var_filt_3 &lt;dbl&gt;, var_filt_15 &lt;dbl&gt;,</span></a>
-<a class="sourceLine" id="cb3-18" title="18"><span class="co">#&gt; #   var_filt_31 &lt;dbl&gt;, sobel_filt_3 &lt;dbl&gt;, sobel_filt_15 &lt;dbl&gt;,</span></a>
-<a class="sourceLine" id="cb3-19" title="19"><span class="co">#&gt; #   sobel_filt_31 &lt;dbl&gt;</span></a></code></pre></div>
+<a class="sourceLine" id="cb3-6" title="6"><span class="co">#&gt; Attaching package: 'purrr'</span></a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="co">#&gt; The following object is masked from 'package:EBImage':</span></a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb3-9" title="9"><span class="co">#&gt;     transpose</span></a>
+<a class="sourceLine" id="cb3-10" title="10"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(feature_df)</a>
+<a class="sourceLine" id="cb3-11" title="11"><span class="co">#&gt; # A tibble: 6 x 16</span></a>
+<a class="sourceLine" id="cb3-12" title="12"><span class="co">#&gt;   gauss_filt_3 gauss_filt_15 gauss_filt_31 DoG_filt_3 DoG_filt_15 DoG_filt_31</span></a>
+<a class="sourceLine" id="cb3-13" title="13"><span class="co">#&gt;          &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;</span></a>
+<a class="sourceLine" id="cb3-14" title="14"><span class="co">#&gt; 1        0.478         0.363         0.352   -3.76e-9     -0.0995     -0.0453</span></a>
+<a class="sourceLine" id="cb3-15" title="15"><span class="co">#&gt; 2        0.478         0.378         0.361   -3.05e-9     -0.0877     -0.0561</span></a>
+<a class="sourceLine" id="cb3-16" title="16"><span class="co">#&gt; 3        0.478         0.388         0.368   -3.23e-9     -0.0771     -0.0493</span></a>
+<a class="sourceLine" id="cb3-17" title="17"><span class="co">#&gt; 4        0.475         0.393         0.376   -3.05e-9     -0.0688     -0.0398</span></a>
+<a class="sourceLine" id="cb3-18" title="18"><span class="co">#&gt; 5        0.475         0.396         0.382   -2.99e-9     -0.0667     -0.0337</span></a>
+<a class="sourceLine" id="cb3-19" title="19"><span class="co">#&gt; 6        0.490         0.397         0.387   -3.76e-9     -0.0777     -0.0321</span></a>
+<a class="sourceLine" id="cb3-20" title="20"><span class="co">#&gt; # … with 10 more variables: var_filt_3 &lt;dbl&gt;, var_filt_15 &lt;dbl&gt;,</span></a>
+<a class="sourceLine" id="cb3-21" title="21"><span class="co">#&gt; #   var_filt_31 &lt;dbl&gt;, sobel_filt_3 &lt;dbl&gt;, sobel_filt_15 &lt;dbl&gt;,</span></a>
+<a class="sourceLine" id="cb3-22" title="22"><span class="co">#&gt; #   sobel_filt_31 &lt;dbl&gt;, c_hough_trans_101 &lt;dbl&gt;, c_hough_trans_201 &lt;dbl&gt;,</span></a>
+<a class="sourceLine" id="cb3-23" title="23"><span class="co">#&gt; #   c_hough_trans_301 &lt;dbl&gt;, c_hough_trans_551 &lt;dbl&gt;</span></a></code></pre></div>
 <p>you can see the features that were calculated by using the following function</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw"><a href="../reference/display_filters.html">display_filters</a></span>(feature_df, <span class="dt">dims =</span> <span class="kw"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(base_image))</a></code></pre></div>
 <p><img src="features_files/figure-html/unnamed-chunk-4-1.png" width="1152"></p>

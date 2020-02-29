@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">clasifierrr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
       </span>
     </div>
 
@@ -207,7 +207,8 @@ requires the dimensions of the post-processed image.</p></li>
 <span class='no'>img</span> <span class='kw'>=</span> <span class='kw pkg'>EBImage</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/EBImage/man/io.html'>readImage</a></span>(<span class='no'>f</span>)
 <span class='no'>my_filter</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>EBImage</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/EBImage/man/morphology.html'>makeBrush</a></span>(<span class='fl'>31</span>, <span class='st'>"gaussian"</span>, <span class='kw'>sigma</span> <span class='kw'>=</span> <span class='fl'>4</span>)
 
-<span class='no'>prepd_filt</span> <span class='kw'>&lt;-</span> <span class='fu'>prep_filter.filter</span>(<span class='kw'>filter</span> <span class='kw'>=</span> <span class='no'>my_filter</span>, <span class='kw'>dim_x</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span>(<span class='no'>img</span>))</div><div class='output co'>#&gt; <span class='error'>Error in prep_filter.filter(filter = my_filter, dim_x = dim(img)): could not find function "prep_filter.filter"</span></div><div class='input'><span class='no'>fft_img</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>fftwtools</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/fftwtools/man/fftw2d.html'>fftw2d</a></span>(<span class='no'>img</span>)
+<span class='no'>prepd_filt</span> <span class='kw'>&lt;-</span> <span class='fu'>prep_filter.filter</span>(<span class='kw'>filter</span> <span class='kw'>=</span> <span class='no'>my_filter</span>, <span class='kw'>dim_x</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span>(<span class='no'>img</span>))
+<span class='no'>fft_img</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>fftwtools</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/fftwtools/man/fftw2d.html'>fftw2d</a></span>(<span class='no'>img</span>)
 
 <span class='co'># Image preprocessing can be skiped if using circular to handle boundries...</span>
 <span class='no'>filtered_img</span> <span class='kw'>&lt;-</span> <span class='fu'>filter2.prepared</span>(
@@ -216,9 +217,10 @@ requires the dimensions of the post-processed image.</p></li>
   <span class='kw'>dims_x</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span>(<span class='no'>img</span>),
   <span class='kw'>dims_x_orig</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span>(<span class='no'>img</span>),
   <span class='kw'>x_dimnames</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/dimnames.html'>dimnames</a></span>(<span class='no'>img</span>),
-  <span class='kw'>prep_filter</span> <span class='kw'>=</span> <span class='no'>prepd_filt</span>)</div><div class='output co'>#&gt; <span class='error'>Error in filter2.prepared(prep_x = img, fft_x = fft_img, dims_x = dim(img),     dims_x_orig = dim(img), x_dimnames = dimnames(img), prep_filter = prepd_filt): object 'prepd_filt' not found</span></div><div class='input'>
+  <span class='kw'>prep_filter</span> <span class='kw'>=</span> <span class='no'>prepd_filt</span>)
+
 <span class='no'>oldschool_filtered</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>EBImage</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/EBImage/man/filter2.html'>filter2</a></span>(<span class='no'>img</span>, <span class='no'>my_filter</span>)
-<span class='fu'><a href='https://rdrr.io/r/base/all.html'>all</a></span>(<span class='no'>oldschool_filtered</span> <span class='kw'>==</span> <span class='no'>filtered_img</span>)</div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): object 'filtered_img' not found</span></div><div class='input'># [1] TRUE
+<span class='fu'><a href='https://rdrr.io/r/base/all.html'>all</a></span>(<span class='no'>oldschool_filtered</span> <span class='kw'>==</span> <span class='no'>filtered_img</span>)</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'># [1] TRUE
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

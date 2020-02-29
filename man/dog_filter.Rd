@@ -45,6 +45,8 @@ my_dog_filter(test_image)
 }
 \seealso{
 Other filters: 
+\code{\link{circular_hough_transform}()},
+\code{\link{compile_hough_circle_draw}()},
 \code{\link{compile_sobel_filter}()},
 \code{\link{compile_variance_filter}()}
 }

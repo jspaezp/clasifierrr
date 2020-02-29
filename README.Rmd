@@ -63,14 +63,14 @@ library(ranger)
 params_df <- tibble::tibble(
     file = c(
         system.file(
-            "extdata", "tiny_4T1-shNT-1_layer1.png",
+            "extdata", "4T1-shNT-1_layer1.png",
             package = "clasifierrr"),
         system.file(
-            "extdata", "tiny_4T1-shNT-1_layer2.png",
+            "extdata", "4T1-shNT-1_layer2.png",
             package = "clasifierrr")),
     classif = c("spheroid", "bg"),
     related_file = system.file(
-        "extdata", "tiny_4T1-shNT-1.png",
+        "extdata", "4T1-shNT-1.png",
         package = "clasifierrr")
 )
 
@@ -110,7 +110,9 @@ THE FILTER WIDTHS HAVE TO BE ODD NUMBERS, also consider that the more filters,
 the more memmory you will need.
 
 ```{r}
-features <- calc_features(base_image, filter_widths = c(3,5))
+features <- calc_features(
+  base_image, filter_widths = c(3,5),
+  shape_sizes = c(201, 501))
 head(features, 2)
 ```
 
@@ -128,7 +130,10 @@ and assigns a classification to the pixles that overlap with the region you
 defined in the "classifier files" (the ones that look like squigly lines)
 
 ```{r}
-trainset <- build_train_multi(params_df, filter_widths = c(3,5))
+trainset <- build_train_multi(
+  params_df, 
+  filter_widths = c(3,5),
+  shape_sizes = c(201, 501))
 head(trainset)
 ```
 
@@ -166,15 +171,19 @@ It Can be used directly on calculated features ...
 ```{r}
 # This just reads the image to classify
 test_img <- readImageBw(system.file(
-        "extdata", "tiny_4T1-shNT-1.png",
+        "extdata", "4T1-shNT-1.png",
         package = "clasifierrr"))
 
-test_feat <- calc_features(test_img, filter_widths = c(3,5))
+test_feat <- calc_features(
+  test_img, filter_widths = c(3,5),
+  shape_sizes = c(201, 501))
 
 class_img <- classify_img(
     classifier, 
     feature_frame = test_feat, 
     dims = dim(test_img), 
+    filter_widths = c(3,5),
+    shape_sizes = c(201, 501),
     class_highlight = "spheroid")
 display(class_img, method = "raster")
 ```
@@ -185,7 +194,8 @@ It can also be used on a raw image ...
 class_img <- classify_img(
   classifier, 
   img = test_img, 
-  filter_widths = c(3,5))
+  filter_widths = c(3,5), 
+  shape_sizes = c(201, 501))
 # display(colorLabels(class_img), method = "raster")
 ```
 
@@ -195,9 +205,10 @@ And as well in a system file
 class_img <- classify_img(
   classifier,
   path = system.file(
-    "extdata", "tiny_4T1-shNT-1.png",
+    "extdata", "4T1-shNT-1.png",
     package = "clasifierrr"),
   filter_widths = c(3,5), 
+  shape_sizes = c(201, 501),
   class_highlight = "spheroid")
 
 # display(class_img, method = "raster")

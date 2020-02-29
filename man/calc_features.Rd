@@ -5,10 +5,16 @@
 \alias{compile_calc_features}
 \title{Calculate filter features}
 \usage{
-calc_features(img, filter_widths = c(3, 5, 11, 23), verbose = FALSE)
+calc_features(
+  img,
+  filter_widths = c(3, 5, 11, 23),
+  shape_sizes = c(51, 101, 151, 201, 251),
+  verbose = FALSE
+)
 
 compile_calc_features(
   filter_widths = c(3, 5, 11, 23),
+  shape_sizes = c(51, 101, 151, 201, 251),
   img_dim,
   verbose = FALSE
 )
@@ -18,6 +24,9 @@ compile_calc_features(
 
 \item{filter_widths}{a numeric vector of odd numbers to be used as the
 width of the feature filters}
+
+\item{shape_sizes}{a numeric vector of odd numbers indicating the expected
+size of the shapes to be found}
 
 \item{verbose}{wether to display progress messages}
 }
@@ -35,10 +44,14 @@ difference of gaussians, adds as well the position in the image
 
 \examples{
 test_image <- matrix(runif(10201), 101)
-feature_df <- calc_features(test_image, c(3,5))
+feature_df <- calc_features(
+    test_image, filter_widths = c(3,5),
+    shape_sizes = c(11, 21))
 head(feature_df)
 
-feature_funs <- compile_calc_features(filter_widths = c(3,5), dim(test_image))
+feature_funs <- compile_calc_features(
+     filter_widths = c(3,5), shape_sizes = c(11, 21),
+     dim(test_image))
 feature_funs[[1]](test_image)
 
 feature_df2 <- purrr::map_dfc(feature_funs, ~ as.numeric(.x(test_image)))

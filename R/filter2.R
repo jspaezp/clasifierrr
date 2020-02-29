@@ -20,6 +20,8 @@
 
 #' @describeIn filter2.prepared precomputes image to handle borders, returns an image
 #'             with attributes
+#' @export
+#' @keywords internal
 prep_filter.img <- function(x, filter_dims,
                             boundary = c("circular", "replicate"),
                             val = NULL) {
@@ -106,6 +108,8 @@ prep_filter.img <- function(x, filter_dims,
 
 #' @describeIn filter2.prepared precomputes the filter to be applied and returns a function,
 #'             requires the dimensions of the post-processed image.
+#' @keywords internal
+#' @export
 prep_filter.filter <- function(filter, dim_x_proc) {
   # in retrospect ... having this one separate is handy for functional
   # programming and job dispatchment but not really time efficient per-se,
@@ -234,6 +238,7 @@ filter2.prepared <- function(prep_x,
 
 
 # for circular the prepd image is the same as the original....
+#' @export
 filter2_circular <- function(img, filter, img_fft = fftwtools::fftw2d(img)) {
   prepd_filter <- prep_filter.filter(filter = filter, dim_x_proc = dim(img))
   filter2.prepared(prep_x = img,

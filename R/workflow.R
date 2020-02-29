@@ -225,12 +225,14 @@ build_train <- function(feat_img, pixel_classes, train_size = 50000) {
 #' trainset <- build_train_multi(
 #'     params_df,
 #'     train_size_each = 5000,
-#'     filter_widths = c(3,5))
+#'     filter_widths = c(3,5), shape_sizes = c(21, 51))
 build_train_multi <- function(imgs_df,
                               train_size_each = 50000,
                               preprocess_fun_img = NULL,
                               preprocess_fun_mask = NULL,
-                              filter_widths = c(3, 5, 15, 31)) {
+                              filter_widths = c(3, 5, 15, 31),
+                              shape_sizes = c(25, 51)
+                              ) {
 
     if (is.null(preprocess_fun_mask)) {
         preprocess_fun_mask = (function(x){x})
@@ -249,7 +251,8 @@ build_train_multi <- function(imgs_df,
         ~ build_train(
           feat_img = calc_features(
               preprocess_fun_img(readImageBw(.x)),
-              filter_widths = filter_widths),
+              filter_widths = filter_widths,
+              shape_sizes = shape_sizes),
           pixel_classes = .y,
           train_size = train_size_each)
     )
@@ -292,6 +295,53 @@ test_build_train_multi <- function() {
 }
 
 
+highlight_category <- function(class_mat, class_highlight = NULL) {
+    classifier_discrete <- inherits(
+        class_mat,
+        c("factor", "character"))
+
+
+    if (classifier_discrete) {
+        unique_vals <- unique(class_mat)
+        if (length(unique_vals) != 2) {
+            warning("The classification had {", length(unique_vals),
+                    "} distinct values as an output, ",
+                    "make sure that is what you want")
+        }
+
+        if (!is.null(class_highlight)) {
+            if (!class_highlight %in% unique_vals) {
+                warning(
+                    "{", class_highlight, "}",
+                    " was not found in the predicted matrix",
+                    " will just use the first one found {",
+                    unique(class_mat)[[1]],
+                    "}\n")
+                class_highlight <- unique(class_mat)[[1]]
+            }
+            class_mat <- as.numeric(class_mat == class_highlight)
+        }
+    } else {
+        if (!is.null(class_highlight)) {
+            warning("The output classifier is not discrete so",
+                    " the provided 'class_highlight' variable {",
+                    class_highlight, "} will be dissregarded\n")
+        }
+    }
+
+    class_mat <- as.numeric(class_mat)
+    if (max(class_mat) > 1 | min(class_mat) < 0) {
+        warning("Found in the final classification {",
+                sum(class_mat > 1), "} values more than 1 and {",
+                sum(class_mat < 0), "} values less than 0, ",
+                "This might be undesired in the final image and lead",
+                " to inconsistencies\n")
+    }
+    return(class_mat)
+}
+
+
+
 
 #' Classify Images
 #'
@@ -325,20 +375,22 @@ test_build_train_multi <- function() {
 #'         "extdata", "tiny_4T1-shNT-1.png",
 #'         package = "clasifierrr")
 #'     )
-#' trainset <- build_train_multi(params_df, filter_widths = c(3, 5, 15))
+#' trainset <- build_train_multi(
+#'     params_df, filter_widths = c(3, 5, 15),
+#'     shape_sizes = c(21, 51))
 #' trainset$pixel_class <- trainset$pixel_class == "spheroid"
 #' model_simple_glm <- glm(pixel_class~.,data = trainset, family = binomial(link = "logit"))
 #' class_img <- classify_img(
 #'     model_simple_glm, path = params_df[[3]][[1]],
-#'     filter_widths = c(3, 5, 15))
+#'     filter_widths = c(3, 5, 15), shape_sizes = c(21, 51))
 #' # plot(as.raster(class_img))
 classify_img <- function(classifier, path = NULL, img = NULL,
-                         feature_frame = NULL, filter_widths = NULL,
+                         feature_frame = NULL, filter_widths, shape_sizes,
                          class_highlight = NULL,
                          dims = NULL, preprocess_fun_img = NULL){
 
     if (is.null(img) & is.null(feature_frame)) {
-        message("Attempting to read image from file", path)
+        message("Attempting to read image from file: ", path)
         img <- readImageBw(path)
         if (!is.null(preprocess_fun_img)) {
             message("Applying image preprocessing")
@@ -350,7 +402,9 @@ classify_img <- function(classifier, path = NULL, img = NULL,
     if (is.null(feature_frame)) {
         message("Attempting to calculate features")
         stopifnot(!is.null(filter_widths))
-        feature_frame <- calc_features(img, filter_widths = filter_widths)
+        feature_frame <- calc_features(
+            img, filter_widths = filter_widths,
+            shape_sizes = shape_sizes)
         dims <- dim(img)
     }
 
@@ -362,84 +416,84 @@ classify_img <- function(classifier, path = NULL, img = NULL,
     time_taken <- Sys.time() - start_time
 
     message(
-        paste("Took",
-        format(as.numeric(time_taken), digits = 4),
+        paste("Took ",
+        format(as.numeric(time_taken), digits = 4), " ",
         attr(time_taken, "units"),
-        "to predict the image"))
+        " to predict the image"))
 
-    classifier_discrete <- inherits(
-        pred_mat,
-        c("factor", "character"))
-
-
-    if (classifier_discrete) {
-        unique_vals <- unique(pred_mat)
-        if (length(unique_vals) != 2) {
-            warning("The classification had {", length(unique_vals),
-                    "} distinct values as an output, ",
-                    "make sure that is what you want")
-        }
-
-        if (!is.null(class_highlight)) {
-            if (!class_highlight %in% unique_vals) {
-                warning(
-                    "{", class_highlight, "}",
-                    " was not found in the predicted matrix",
-                    " will just use the first one found {",
-                    unique(pred_mat)[[1]],
-                    "}\n")
-                class_highlight <- unique(pred_mat)[[1]]
-            }
-            pred_mat <- as.numeric(pred_mat == class_highlight)
-        }
-    } else {
-        if (!is.null(class_highlight)) {
-            warning("The output classifier is not discrete so",
-                    " the provided 'class_highlight' variable {",
-                    class_highlight, "} will be dissregarded\n")
-        }
-    }
-
-    pred_mat <- as.numeric(pred_mat)
-    if (max(pred_mat) > 1 | min(pred_mat) < 0) {
-        warning("Found in the final classification {",
-                sum(pred_mat > 1), "} values more than 1 and {",
-                sum(pred_mat < 0), "} values less than 0, ",
-                "This might be undesired in the final image and lead",
-                " to inconsistencies\n")
-    }
+    pred_mat <- highlight_category(pred_mat, class_highlight)
     out_img <- EBImage::Image(pred_mat, dim = dims)
     return(out_img)
 }
 
+
+
+
+#' A wrapper that handles classifier models to output images
+#'
+#' It is a fairly thin wrapper arround `predict`.
+#'
+#' @title predict_img: Classify pixels based on models and features
+#' @param x model to use for classification
+#' @param feature_frame a data frame with the features
+#' @param ... Additional arguments, passed to `predict`
+#' @examples
+#'
+#' @rdname predict_img
+#' @export predict_img
 predict_img <- function(x, ...) {
     UseMethod("predict_img")
 }
 
-predict_img.glm <- function(x, feature_frame) {
-    prediction <- predict(x, feature_frame, type = "response")
+
+#' @return \code{NULL}
+#'
+#' @rdname predict_img
+#' @method predict_img glm
+predict_img.glm <- function(x, feature_frame, ...) {
+    prediction <- predict(x, feature_frame, type = "response", ...)
     return(prediction)
 }
 
-predict_img.ranger <- function(x, feature_frame) {
-    prediction <- ranger:::predict.ranger(x, data = feature_frame)
+
+#' @return \code{NULL}
+#'
+#' @rdname predict_img
+#' @method predict_img ranger
+predict_img.ranger <- function(x, feature_frame, ...) {
+    prediction <- ranger:::predict.ranger(x, data = feature_frame, ...)
     pred_mat <- prediction$predictions
     return(pred_mat)
 }
 
-predict_img.ksvm <- function(x, feature_frame) {
-    prediction <- kernlab::predict(x, feature_frame)
+
+#' @return \code{NULL}
+#'
+#' @rdname predict_img
+#' @method predict_img ksvm
+predict_img.ksvm <- function(x, feature_frame, ...) {
+    prediction <- kernlab::predict(x, feature_frame, ...)
     return(prediction)
 }
 
 
-predict_img.default <- function(x, feature_frame) {
-    prediction <- predict(x, feature_frame)
+#' @return \code{NULL}
+#'
+#' @rdname predict_img
+#' @method predict_img default
+predict_img.default <- function(x, feature_frame, ...) {
+    prediction <- predict(x, feature_frame, ...)
     return(prediction)
 }
 
-predict_img.glmnet <- function(x, feature_frame) {
-    predict_img.default(x, as.matrix(feature_frame))
+
+#' @return \code{NULL}
+#'
+#' @rdname predict_img
+#' @method predict_img glmnet
+predict_img.glmnet <- function(x, feature_frame, ...) {
+    prediction <- predict_img.default(x, as.matrix(feature_frame), ...)
+    return(prediction)
 }
 
 
@@ -456,17 +510,21 @@ predict_img.glmnet <- function(x, feature_frame) {
 #' @examples
 #' myfile <- system.file("extdata", "4T1-shNT-1.png", package = "clasifierrr")
 #' myimg <- readImageBw(myfile)
-#' myfeat <- calc_features(myimg, c(3,5))
-#' display_filters(myfeat, dim(myimg))
+#' myfeat <- calc_features(myimg, c(3,5), shape_sizes = c(51, 501))
+#' display_filters(myfeat, dim(myimg), scale = TRUE)
+#' @importFrom EBImage normalize combine Image
 display_filters <- function(feature_df, dims, scale = FALSE) {
-
-    if (scale) {
-        feature_df <- lapply(feature_df, function(...) { scale(...) + 0.5 } )
-    }
 
     image_full_list <- purrr::map(
         names(feature_df),
         ~ EBImage::Image(feature_df[[.x]], dims))
+
+    if (scale) {
+        image_full_list <- lapply(
+            image_full_list,
+            function(...) { EBImage::normalize(...) } )
+    }
+
     comb_img <- EBImage::combine(image_full_list)
     EBImage::display(
         comb_img,
