@@ -231,7 +231,7 @@ build_train_multi <- function(imgs_df,
                               preprocess_fun_img = NULL,
                               preprocess_fun_mask = NULL,
                               filter_widths = c(3, 5, 15, 31),
-                              shape_sizes = c(51, 101, 151, 201, 251)
+                              shape_sizes = c(25, 51)
                               ) {
 
     if (is.null(preprocess_fun_mask)) {
@@ -390,7 +390,7 @@ classify_img <- function(classifier, path = NULL, img = NULL,
                          dims = NULL, preprocess_fun_img = NULL){
 
     if (is.null(img) & is.null(feature_frame)) {
-        message("Attempting to read image from file", path)
+        message("Attempting to read image from file: ", path)
         img <- readImageBw(path)
         if (!is.null(preprocess_fun_img)) {
             message("Applying image preprocessing")
@@ -416,10 +416,10 @@ classify_img <- function(classifier, path = NULL, img = NULL,
     time_taken <- Sys.time() - start_time
 
     message(
-        paste("Took",
-        format(as.numeric(time_taken), digits = 4),
+        paste("Took ",
+        format(as.numeric(time_taken), digits = 4), " ",
         attr(time_taken, "units"),
-        "to predict the image"))
+        " to predict the image"))
 
     pred_mat <- highlight_category(pred_mat, class_highlight)
     out_img <- EBImage::Image(pred_mat, dim = dims)

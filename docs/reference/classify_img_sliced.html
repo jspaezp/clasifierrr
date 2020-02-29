@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculates a data frame to train classifiers — build_train_multi • clasifierrr</title>
+<title>Classify images as superpixel slices — classify_img_sliced • clasifierrr</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Calculates a data frame to train classifiers — build_train_multi" />
-<meta property="og:description" content="Calculates a data frame to train classifiers" />
+<meta property="og:title" content="Classify images as superpixel slices — classify_img_sliced" />
+<meta property="og:description" content="Classify images as superpixel slices" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -121,78 +121,76 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Calculates a data frame to train classifiers</h1>
+    <h1>Classify images as superpixel slices</h1>
     
-    <div class="hidden name"><code>build_train_multi.Rd</code></div>
+    <div class="hidden name"><code>classify_img_sliced.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Calculates a data frame to train classifiers</p>
+    <p>Classify images as superpixel slices</p>
     </div>
 
-    <pre class="usage"><span class='fu'>build_train_multi</span>(
-  <span class='no'>imgs_df</span>,
-  <span class='kw'>train_size_each</span> <span class='kw'>=</span> <span class='fl'>50000</span>,
-  <span class='kw'>preprocess_fun_img</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>preprocess_fun_mask</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>5</span>, <span class='fl'>15</span>, <span class='fl'>31</span>),
-  <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>51</span>, <span class='fl'>101</span>, <span class='fl'>151</span>, <span class='fl'>201</span>, <span class='fl'>251</span>)
+    <pre class="usage"><span class='fu'>classify_img_sliced</span>(
+  <span class='no'>classifier</span>,
+  <span class='no'>img</span>,
+  <span class='kw'>slices</span> <span class='kw'>=</span> <span class='fu'><a href='slic.html'>slic</a></span>(<span class='fu'><a href='sobel_filter.html'>sobel_filter</a></span>(<span class='no'>img</span>, <span class='fl'>5</span>))<span class='kw'>[[</span><span class='fl'>2</span>]],
+  <span class='no'>features</span>,
+  <span class='no'>class_highlight</span>,
+  <span class='no'>...</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>imgs_df</th>
-      <td><p>a data frame specifying the masks and images to use, see details</p></td>
+      <th>classifier</th>
+      <td><p>a classifier</p></td>
     </tr>
     <tr>
-      <th>train_size_each</th>
-      <td><p>number of elements to keep for each mask/image combination</p></td>
+      <th>img</th>
+      <td><p>image to classify</p></td>
     </tr>
     <tr>
-      <th>preprocess_fun_img</th>
-      <td><p>optional, processing function to be applied to each image</p></td>
+      <th>features</th>
+      <td><p>a features frame to be used for the classification</p></td>
     </tr>
     <tr>
-      <th>preprocess_fun_mask</th>
-      <td><p>optional, processing function to be applied to each mask</p></td>
+      <th>class_highlight</th>
+      <td><p>a classiication to highlight if the prediction is categorical</p></td>
     </tr>
     <tr>
-      <th>filter_widths</th>
-      <td><p>numeric vector with the filter widths to be used</p></td>
+      <th>...</th>
+      <td><p>additional arguments passed to kmeans</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>data.frame</p>
+    
+
+
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p>slic</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>params_df</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>tibble</span><span class='kw ns'>::</span><span class='fu'><a href='https://tibble.tidyverse.org/reference/tibble.html'>tibble</a></span>(
-    <span class='kw'>file</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(
-        <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(
-            <span class='st'>"extdata"</span>, <span class='st'>"tiny_4T1-shNT-1_layer1.png"</span>,
-            <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"clasifierrr"</span>),
-        <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(
-            <span class='st'>"extdata"</span>, <span class='st'>"tiny_4T1-shNT-1_layer2.png"</span>,
-            <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"clasifierrr"</span>)),
-    <span class='kw'>classif</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"spheroid"</span>, <span class='st'>"bg"</span>),
-    <span class='kw'>related_file</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(
-        <span class='st'>"extdata"</span>, <span class='st'>"tiny_4T1-shNT-1.png"</span>,
-        <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"clasifierrr"</span>)
-    )
-<span class='no'>trainset</span> <span class='kw'>&lt;-</span> <span class='fu'>build_train_multi</span>(
-    <span class='no'>params_df</span>,
-    <span class='kw'>train_size_each</span> <span class='kw'>=</span> <span class='fl'>5000</span>,
-    <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>,<span class='fl'>5</span>), <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>21</span>, <span class='fl'>51</span>))</div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 8556 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 14056 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Classified objects are of classes {bg: 3069} and {spheroid: 1931}</span>
-#&gt; <span class='message'></span></div><div class='output co'>#&gt; <span class='message'>Returning a data frame of 5000 rows and 11 columns</span></div></pre>
+    <pre class="examples"><div class='input'># trainset <- build_train_multi(
+# params_df,
+# train_size_each = 5000,
+# filter_widths = c(3,5))
+#
+# classifier <- ranger::ranger(pixel_class ~ ., trainset)
+# features <- calc_features(base_img, c(3,5))
+# sliced_img <- slic(sobel_filter(base_img, 5))
+# classify_img_sliced(classifier, base_img, sliced_img[[2]],features, "sphere")
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
+      <li><a href="#see-also">See also</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>
 

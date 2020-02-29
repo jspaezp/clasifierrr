@@ -33,7 +33,7 @@
 #' @importFrom furrr future_map future_map_dfc
 #' @importFrom EBImage Image makeBrush filter2
 calc_features <- function(img, filter_widths = c(3,5,11,23),
-                          shape_sizes = c(51, 101, 151, 201, 251),
+                          shape_sizes = c(25, 51),
                           verbose = FALSE){
     start_time <- Sys.time()
     if (verbose) message(
@@ -76,7 +76,7 @@ calc_features <- function(img, filter_widths = c(3,5,11,23),
 #' @export
 compile_calc_features <- function(
     filter_widths = c(3,5,11,23),
-    shape_sizes = c(51, 101, 151, 201, 251),
+    shape_sizes = c(25, 51),
     img_dim,
     verbose = FALSE) {
 

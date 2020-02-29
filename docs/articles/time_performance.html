@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">clasifierrr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
       </span>
     </div>
 
@@ -116,8 +116,8 @@
 <a class="sourceLine" id="cb2-16" title="16"><span class="co">#&gt; # A tibble: 2 x 3</span></a>
 <a class="sourceLine" id="cb2-17" title="17"><span class="co">#&gt;   file                              classif related_file                        </span></a>
 <a class="sourceLine" id="cb2-18" title="18"><span class="co">#&gt;   &lt;chr&gt;                             &lt;chr&gt;   &lt;chr&gt;                               </span></a>
-<a class="sourceLine" id="cb2-19" title="19"><span class="co">#&gt; 1 /tmp/RtmpGL73Jd/temp_libpath5cdb… sphero… /tmp/RtmpGL73Jd/temp_libpath5cdbb1a…</span></a>
-<a class="sourceLine" id="cb2-20" title="20"><span class="co">#&gt; 2 /tmp/RtmpGL73Jd/temp_libpath5cdb… bg      /tmp/RtmpGL73Jd/temp_libpath5cdbb1a…</span></a></code></pre></div>
+<a class="sourceLine" id="cb2-19" title="19"><span class="co">#&gt; 1 /tmp/Rtmpj1ueSh/temp_libpath734f… sphero… /tmp/Rtmpj1ueSh/temp_libpath734f364…</span></a>
+<a class="sourceLine" id="cb2-20" title="20"><span class="co">#&gt; 2 /tmp/Rtmpj1ueSh/temp_libpath734f… bg      /tmp/Rtmpj1ueSh/temp_libpath734f364…</span></a></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">base_image &lt;-<span class="st"> </span><span class="kw"><a href="../reference/readImageBw.html">readImageBw</a></span>(params_df[[<span class="dv">3</span>]][[<span class="dv">1</span>]])</a>
 <a class="sourceLine" id="cb3-2" title="2"><span class="kw"><a href="https://rdrr.io/pkg/EBImage/man/display.html">display</a></span>(base_image, <span class="dt">method =</span> <span class="st">"raster"</span>)</a></code></pre></div>
 <p><img src="time_performance_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
@@ -128,7 +128,7 @@
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">time_taken_full &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>({</a>
 <a class="sourceLine" id="cb4-2" title="2">    features &lt;-<span class="st"> </span><span class="kw"><a href="../reference/calc_features.html">calc_features</a></span>(</a>
 <a class="sourceLine" id="cb4-3" title="3">        base_image, </a>
-<a class="sourceLine" id="cb4-4" title="4">        <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>))</a>
+<a class="sourceLine" id="cb4-4" title="4">        <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>), <span class="dt">shape_sizes =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">51</span>, <span class="dv">101</span>))</a>
 <a class="sourceLine" id="cb4-5" title="5">})</a>
 <a class="sourceLine" id="cb4-6" title="6"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb4-7" title="7"><span class="co">#&gt; Attaching package: 'purrr'</span></a>
@@ -138,10 +138,10 @@
 <a class="sourceLine" id="cb4-11" title="11"></a>
 <a class="sourceLine" id="cb4-12" title="12">time_taken_full</a>
 <a class="sourceLine" id="cb4-13" title="13"><span class="co">#&gt;    user  system elapsed </span></a>
-<a class="sourceLine" id="cb4-14" title="14"><span class="co">#&gt;   0.229   0.017   0.255</span></a>
+<a class="sourceLine" id="cb4-14" title="14"><span class="co">#&gt;   0.545   0.080   0.662</span></a>
 <a class="sourceLine" id="cb4-15" title="15"><span class="kw"><a href="https://rdrr.io/r/utils/object.size.html">object.size</a></span>(features)</a>
-<a class="sourceLine" id="cb4-16" title="16"><span class="co">#&gt; 2022248 bytes</span></a></code></pre></div>
-<p>we can notice that it takes 0.255 seconds to achieve the calculation and the <code>features</code> object ocupies 1.9 Mb.</p>
+<a class="sourceLine" id="cb4-16" title="16"><span class="co">#&gt; 2527752 bytes</span></a></code></pre></div>
+<p>we can notice that it takes 0.662 seconds to achieve the calculation and the <code>features</code> object ocupies 2.4 Mb.</p>
 <p>Nonetheless, since we basically are doing one calculation per pixels, per filter, decreasing the number of pixels would decrease the number of calculation by that number. And therefore, decreasing the size will accelerate the speed with the square of that reduction (since its a 2d image)</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">newsize &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span>(base_image)<span class="op">/</span><span class="dv">2</span>)</a>
 <a class="sourceLine" id="cb5-2" title="2">shrunk_image &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/pkg/EBImage/man/spatial.html">resize</a></span>(base_image, <span class="dt">w =</span> newsize)</a>
@@ -149,16 +149,16 @@
 <a class="sourceLine" id="cb5-4" title="4">time_taken_shrunk &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>({</a>
 <a class="sourceLine" id="cb5-5" title="5">    shrunk_features &lt;-<span class="st"> </span><span class="kw"><a href="../reference/calc_features.html">calc_features</a></span>(</a>
 <a class="sourceLine" id="cb5-6" title="6">        shrunk_image, </a>
-<a class="sourceLine" id="cb5-7" title="7">        <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>))</a>
+<a class="sourceLine" id="cb5-7" title="7">        <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>), <span class="dt">shape_sizes =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">15</span>, <span class="dv">31</span>))</a>
 <a class="sourceLine" id="cb5-8" title="8">})</a>
 <a class="sourceLine" id="cb5-9" title="9"></a>
 <a class="sourceLine" id="cb5-10" title="10">time_taken_shrunk</a>
 <a class="sourceLine" id="cb5-11" title="11"><span class="co">#&gt;    user  system elapsed </span></a>
-<a class="sourceLine" id="cb5-12" title="12"><span class="co">#&gt;   0.037   0.000   0.037</span></a>
+<a class="sourceLine" id="cb5-12" title="12"><span class="co">#&gt;   0.067   0.000   0.069</span></a>
 <a class="sourceLine" id="cb5-13" title="13"><span class="kw"><a href="https://rdrr.io/r/utils/object.size.html">object.size</a></span>(shrunk_features)</a>
-<a class="sourceLine" id="cb5-14" title="14"><span class="co">#&gt; 287592 bytes</span></a></code></pre></div>
-<p>we can notice that now it takes 0.037 seconds to achieve the calculation and the <code>shrunk_features</code> object ocupies 0.3 Mb.</p>
-<p>which is a 6.8918919 fold decrease in time and 7.031656 decrease in used memmory</p>
+<a class="sourceLine" id="cb5-14" title="14"><span class="co">#&gt; 359432 bytes</span></a></code></pre></div>
+<p>we can notice that now it takes 0.069 seconds to achieve the calculation and the <code>shrunk_features</code> object ocupies 0.3 Mb.</p>
+<p>which is a 9.5942029 fold decrease in time and 7.0326293 decrease in used memmory</p>
 <p>lets take a look at the actual filters …</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw"><a href="../reference/display_filters.html">display_filters</a></span>(shrunk_features, <span class="kw"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(shrunk_image), <span class="dt">scale =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <p><img src="time_performance_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
@@ -178,10 +178,10 @@
 <a class="sourceLine" id="cb9-4" title="4">        <span class="dt">train_size_each =</span> <span class="dv">5000</span>, </a>
 <a class="sourceLine" id="cb9-5" title="5">        <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>))</a>
 <a class="sourceLine" id="cb9-6" title="6">})</a>
-<a class="sourceLine" id="cb9-7" title="7"><span class="co">#&gt; Returning for file:  /tmp/RtmpGL73Jd/temp_libpath5cdbb1af11572/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 8556 } positive pixels</span></a>
-<a class="sourceLine" id="cb9-8" title="8"><span class="co">#&gt; Returning for file:  /tmp/RtmpGL73Jd/temp_libpath5cdbb1af11572/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 14056 } positive pixels</span></a>
-<a class="sourceLine" id="cb9-9" title="9"><span class="co">#&gt; Classified objects are of classes {bg: 3094} and {spheroid: 1906}</span></a>
-<a class="sourceLine" id="cb9-10" title="10"><span class="co">#&gt; Returning a data frame of 5000 rows and 9 columns</span></a>
+<a class="sourceLine" id="cb9-7" title="7"><span class="co">#&gt; Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 8556 } positive pixels</span></a>
+<a class="sourceLine" id="cb9-8" title="8"><span class="co">#&gt; Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 14056 } positive pixels</span></a>
+<a class="sourceLine" id="cb9-9" title="9"><span class="co">#&gt; Classified objects are of classes {bg: 3156} and {spheroid: 1844}</span></a>
+<a class="sourceLine" id="cb9-10" title="10"><span class="co">#&gt; Returning a data frame of 5000 rows and 11 columns</span></a>
 <a class="sourceLine" id="cb9-11" title="11"></a>
 <a class="sourceLine" id="cb9-12" title="12">multi_time_shrunk &lt;-<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>({</a>
 <a class="sourceLine" id="cb9-13" title="13">    trainset &lt;-<span class="st"> </span><span class="kw"><a href="../reference/build_train_multi.html">build_train_multi</a></span>(</a>
@@ -189,36 +189,43 @@
 <a class="sourceLine" id="cb9-15" title="15">        <span class="dt">preprocess_fun_img =</span> half_image,</a>
 <a class="sourceLine" id="cb9-16" title="16">        <span class="dt">preprocess_fun_mask =</span> half_image, </a>
 <a class="sourceLine" id="cb9-17" title="17">        <span class="dt">train_size_each =</span> <span class="dv">5000</span>, </a>
-<a class="sourceLine" id="cb9-18" title="18">        <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>))</a>
+<a class="sourceLine" id="cb9-18" title="18">        <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>), <span class="dt">shape_sizes =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">15</span>, <span class="dv">31</span>))</a>
 <a class="sourceLine" id="cb9-19" title="19">})</a>
-<a class="sourceLine" id="cb9-20" title="20"><span class="co">#&gt; Returning for file:  /tmp/RtmpGL73Jd/temp_libpath5cdbb1af11572/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 1382 } positive pixels</span></a>
-<a class="sourceLine" id="cb9-21" title="21"><span class="co">#&gt; Returning for file:  /tmp/RtmpGL73Jd/temp_libpath5cdbb1af11572/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 2171 } positive pixels</span></a>
+<a class="sourceLine" id="cb9-20" title="20"><span class="co">#&gt; Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 1382 } positive pixels</span></a>
+<a class="sourceLine" id="cb9-21" title="21"><span class="co">#&gt; Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 2171 } positive pixels</span></a>
 <a class="sourceLine" id="cb9-22" title="22"><span class="co">#&gt; Warning in build_train(feat_img = calc_features(preprocess_fun_img(readImageBw(.x)), : The selected train size(5000) is larger than the number of classified pixels (3541)  so the number is getting updated to the total number of available pixels</span></a>
 <a class="sourceLine" id="cb9-23" title="23"><span class="co">#&gt; Classified objects are of classes {bg: 2171} and {spheroid: 1370}</span></a>
-<a class="sourceLine" id="cb9-24" title="24"><span class="co">#&gt; Returning a data frame of 3541 rows and 9 columns</span></a>
+<a class="sourceLine" id="cb9-24" title="24"><span class="co">#&gt; Returning a data frame of 3541 rows and 11 columns</span></a>
 <a class="sourceLine" id="cb9-25" title="25"></a>
 <a class="sourceLine" id="cb9-26" title="26">multi_time_full</a>
 <a class="sourceLine" id="cb9-27" title="27"><span class="co">#&gt;    user  system elapsed </span></a>
-<a class="sourceLine" id="cb9-28" title="28"><span class="co">#&gt;   0.224   0.004   0.230</span></a>
+<a class="sourceLine" id="cb9-28" title="28"><span class="co">#&gt;   0.282   0.000   0.286</span></a>
 <a class="sourceLine" id="cb9-29" title="29">multi_time_shrunk</a>
 <a class="sourceLine" id="cb9-30" title="30"><span class="co">#&gt;    user  system elapsed </span></a>
-<a class="sourceLine" id="cb9-31" title="31"><span class="co">#&gt;   0.132   0.002   0.135</span></a>
+<a class="sourceLine" id="cb9-31" title="31"><span class="co">#&gt;   0.220   0.000   0.231</span></a>
 <a class="sourceLine" id="cb9-32" title="32"><span class="kw"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(trainset)</a>
 <a class="sourceLine" id="cb9-33" title="33"><span class="co">#&gt;   gauss_filt_3 gauss_filt_5    DoG_filt_3    DoG_filt_5   var_filt_3</span></a>
-<a class="sourceLine" id="cb9-34" title="34"><span class="co">#&gt; 1   0.04705882   0.04679428 -4.110970e-11 -0.0002645397 1.100745e-06</span></a>
-<a class="sourceLine" id="cb9-35" title="35"><span class="co">#&gt; 2   0.04705882   0.04654686 -7.791318e-11 -0.0005119619 1.452466e-06</span></a>
-<a class="sourceLine" id="cb9-36" title="36"><span class="co">#&gt; 3   0.62176444   0.59299624 -4.506848e-09 -0.0287682004 2.739324e-03</span></a>
-<a class="sourceLine" id="cb9-37" title="37"><span class="co">#&gt; 4   0.05915369   0.05975785  9.567298e-11  0.0006041552 7.578079e-06</span></a>
-<a class="sourceLine" id="cb9-38" title="38"><span class="co">#&gt; 5   0.05490196   0.05477777 -9.628916e-13 -0.0001241866 2.316357e-06</span></a>
-<a class="sourceLine" id="cb9-39" title="39"><span class="co">#&gt; 6   0.44817927   0.45215556  8.316354e-10  0.0039762905 2.744145e-04</span></a>
-<a class="sourceLine" id="cb9-40" title="40"><span class="co">#&gt;     var_filt_5 sobel_filt_3 sobel_filt_5 pixel_class</span></a>
-<a class="sourceLine" id="cb9-41" title="41"><span class="co">#&gt; 1 2.144681e-06  0.021775576  0.057450161    spheroid</span></a>
-<a class="sourceLine" id="cb9-42" title="42"><span class="co">#&gt; 2 4.765564e-06  0.008161257  0.005099324    spheroid</span></a>
-<a class="sourceLine" id="cb9-43" title="43"><span class="co">#&gt; 3 5.749679e-03  0.228855603  1.912834368          bg</span></a>
-<a class="sourceLine" id="cb9-44" title="44"><span class="co">#&gt; 4 1.860080e-05  0.031167337  0.138479562    spheroid</span></a>
-<a class="sourceLine" id="cb9-45" title="45"><span class="co">#&gt; 5 4.054033e-06  0.006010068  0.037391053    spheroid</span></a>
-<a class="sourceLine" id="cb9-46" title="46"><span class="co">#&gt; 6 2.794402e-04  0.118558775  0.233771456          bg</span></a></code></pre></div>
-<p>In this case it would be a increase in 1.7037037 times of computation.</p>
+<a class="sourceLine" id="cb9-34" title="34"><span class="co">#&gt; 1   0.04705882   0.04708729 -1.527238e-11  2.846708e-05 7.160083e-06</span></a>
+<a class="sourceLine" id="cb9-35" title="35"><span class="co">#&gt; 2   0.29444957   0.29151761 -4.254065e-10 -2.931952e-03 6.400751e-03</span></a>
+<a class="sourceLine" id="cb9-36" title="36"><span class="co">#&gt; 3   0.35889114   0.35376300 -8.242000e-10 -5.128141e-03 2.342310e-03</span></a>
+<a class="sourceLine" id="cb9-37" title="37"><span class="co">#&gt; 4   0.05098039   0.05108247  1.412226e-11  1.020745e-04 4.186785e-07</span></a>
+<a class="sourceLine" id="cb9-38" title="38"><span class="co">#&gt; 5   0.44913640   0.45466559  9.397189e-10  5.529192e-03 3.631790e-04</span></a>
+<a class="sourceLine" id="cb9-39" title="39"><span class="co">#&gt; 6   0.36009764   0.35933889 -3.195697e-10 -7.587559e-04 2.588423e-03</span></a>
+<a class="sourceLine" id="cb9-40" title="40"><span class="co">#&gt;     var_filt_5 sobel_filt_3 sobel_filt_5 c_hough_trans_15 c_hough_trans_31</span></a>
+<a class="sourceLine" id="cb9-41" title="41"><span class="co">#&gt; 1 1.194307e-04   0.04155578   0.22384625    -4.295713e-17     3.369023e-02</span></a>
+<a class="sourceLine" id="cb9-42" title="42"><span class="co">#&gt; 2 1.067789e-02   0.18437013   3.40574883     8.817155e-02     3.014982e-02</span></a>
+<a class="sourceLine" id="cb9-43" title="43"><span class="co">#&gt; 3 3.236282e-03   0.02386048   2.02252364    -1.234653e-17     3.888620e-05</span></a>
+<a class="sourceLine" id="cb9-44" title="44"><span class="co">#&gt; 4 2.819817e-06   0.02607755   0.12956621     2.004049e-02     9.976858e-01</span></a>
+<a class="sourceLine" id="cb9-45" title="45"><span class="co">#&gt; 5 3.565177e-04   0.10007273   0.08271719     1.027663e-17    -1.464205e-16</span></a>
+<a class="sourceLine" id="cb9-46" title="46"><span class="co">#&gt; 6 5.889038e-03   1.37781401   4.11156951     3.456103e-01     6.319632e-01</span></a>
+<a class="sourceLine" id="cb9-47" title="47"><span class="co">#&gt;   pixel_class</span></a>
+<a class="sourceLine" id="cb9-48" title="48"><span class="co">#&gt; 1    spheroid</span></a>
+<a class="sourceLine" id="cb9-49" title="49"><span class="co">#&gt; 2          bg</span></a>
+<a class="sourceLine" id="cb9-50" title="50"><span class="co">#&gt; 3          bg</span></a>
+<a class="sourceLine" id="cb9-51" title="51"><span class="co">#&gt; 4    spheroid</span></a>
+<a class="sourceLine" id="cb9-52" title="52"><span class="co">#&gt; 5          bg</span></a>
+<a class="sourceLine" id="cb9-53" title="53"><span class="co">#&gt; 6    spheroid</span></a></code></pre></div>
+<p>In this case it would be a increase in 1.2380952 times of computation.</p>
 <p>Preprocessing functions can be much more complicated …</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1">preprocess_img &lt;-<span class="st"> </span><span class="cf">function</span>(x) {</a>
 <a class="sourceLine" id="cb10-2" title="2">    x &lt;-<span class="st"> </span><span class="kw"><a href="../reference/correct_light.html">correct_light</a></span>(x, <span class="dt">chunk_width =</span> <span class="dv">11</span>)</a>
@@ -239,12 +246,13 @@
 <a class="sourceLine" id="cb12-4" title="4">        <span class="dt">preprocess_fun_img =</span> preprocess_img,</a>
 <a class="sourceLine" id="cb12-5" title="5">        <span class="dt">preprocess_fun_mask =</span> half_image, </a>
 <a class="sourceLine" id="cb12-6" title="6">        <span class="dt">train_size_each =</span> <span class="dv">1000</span>, </a>
-<a class="sourceLine" id="cb12-7" title="7">        <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>))</a>
-<a class="sourceLine" id="cb12-8" title="8">})</a>
-<a class="sourceLine" id="cb12-9" title="9"><span class="co">#&gt; Returning for file:  /tmp/RtmpGL73Jd/temp_libpath5cdbb1af11572/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 1382 } positive pixels</span></a>
-<a class="sourceLine" id="cb12-10" title="10"><span class="co">#&gt; Returning for file:  /tmp/RtmpGL73Jd/temp_libpath5cdbb1af11572/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 2171 } positive pixels</span></a>
-<a class="sourceLine" id="cb12-11" title="11"><span class="co">#&gt; Classified objects are of classes {bg: 623} and {spheroid: 377}</span></a>
-<a class="sourceLine" id="cb12-12" title="12"><span class="co">#&gt; Returning a data frame of 1000 rows and 9 columns</span></a></code></pre></div>
+<a class="sourceLine" id="cb12-7" title="7">        <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>),</a>
+<a class="sourceLine" id="cb12-8" title="8">        <span class="dt">shape_sizes =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">15</span>, <span class="dv">31</span>))</a>
+<a class="sourceLine" id="cb12-9" title="9">})</a>
+<a class="sourceLine" id="cb12-10" title="10"><span class="co">#&gt; Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 1382 } positive pixels</span></a>
+<a class="sourceLine" id="cb12-11" title="11"><span class="co">#&gt; Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 2171 } positive pixels</span></a>
+<a class="sourceLine" id="cb12-12" title="12"><span class="co">#&gt; Classified objects are of classes {bg: 607} and {spheroid: 393}</span></a>
+<a class="sourceLine" id="cb12-13" title="13"><span class="co">#&gt; Returning a data frame of 1000 rows and 11 columns</span></a></code></pre></div>
 </div>
 <div id="precompilation-of-filters" class="section level1">
 <h1 class="hasAnchor">
@@ -254,20 +262,24 @@
 <a class="sourceLine" id="cb13-2" title="2"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>) {</a>
 <a class="sourceLine" id="cb13-3" title="3">  features &lt;-<span class="st"> </span><span class="kw"><a href="../reference/calc_features.html">calc_features</a></span>(</a>
 <a class="sourceLine" id="cb13-4" title="4">    base_image, </a>
-<a class="sourceLine" id="cb13-5" title="5">    <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">11</span>,<span class="dv">15</span>))</a>
-<a class="sourceLine" id="cb13-6" title="6">}})</a>
-<a class="sourceLine" id="cb13-7" title="7"><span class="co">#&gt;    user  system elapsed </span></a>
-<a class="sourceLine" id="cb13-8" title="8"><span class="co">#&gt;   2.112   0.011   2.139</span></a>
-<a class="sourceLine" id="cb13-9" title="9"></a>
-<a class="sourceLine" id="cb13-10" title="10">fft_image &lt;-<span class="st"> </span>fftwtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/fftwtools/man/fftw2d.html">fftw2d</a></span>(base_image)</a>
-<a class="sourceLine" id="cb13-11" title="11">precompiled_filters &lt;-<span class="st"> </span><span class="kw"><a href="../reference/calc_features.html">compile_calc_features</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">11</span>,<span class="dv">15</span>), <span class="kw"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(base_image))</a>
-<a class="sourceLine" id="cb13-12" title="12"></a>
-<a class="sourceLine" id="cb13-13" title="13"><span class="kw"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>({</a>
-<a class="sourceLine" id="cb13-14" title="14"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>) {</a>
-<a class="sourceLine" id="cb13-15" title="15">  features &lt;-<span class="st"> </span>purrr<span class="op">::</span><span class="kw"><a href="https://purrr.tidyverse.org/reference/map.html">map_dfc</a></span>(precompiled_filters, <span class="op">~</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span>(<span class="kw">.x</span>(fft_image)))</a>
-<a class="sourceLine" id="cb13-16" title="16">}})</a>
-<a class="sourceLine" id="cb13-17" title="17"><span class="co">#&gt;    user  system elapsed </span></a>
-<a class="sourceLine" id="cb13-18" title="18"><span class="co">#&gt;   1.176   0.002   1.186</span></a></code></pre></div>
+<a class="sourceLine" id="cb13-5" title="5">    <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">11</span>,<span class="dv">15</span>),</a>
+<a class="sourceLine" id="cb13-6" title="6">    <span class="dt">shape_sizes =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">15</span>, <span class="dv">31</span>))</a>
+<a class="sourceLine" id="cb13-7" title="7">}})</a>
+<a class="sourceLine" id="cb13-8" title="8"><span class="co">#&gt;    user  system elapsed </span></a>
+<a class="sourceLine" id="cb13-9" title="9"><span class="co">#&gt;   3.391   0.014   3.451</span></a>
+<a class="sourceLine" id="cb13-10" title="10"></a>
+<a class="sourceLine" id="cb13-11" title="11">fft_image &lt;-<span class="st"> </span>fftwtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/fftwtools/man/fftw2d.html">fftw2d</a></span>(base_image)</a>
+<a class="sourceLine" id="cb13-12" title="12">precompiled_filters &lt;-<span class="st"> </span><span class="kw"><a href="../reference/calc_features.html">compile_calc_features</a></span>(</a>
+<a class="sourceLine" id="cb13-13" title="13">  <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">11</span>,<span class="dv">15</span>),</a>
+<a class="sourceLine" id="cb13-14" title="14">  <span class="dt">shape_sizes =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">15</span>, <span class="dv">31</span>),</a>
+<a class="sourceLine" id="cb13-15" title="15">  <span class="kw"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(base_image))</a>
+<a class="sourceLine" id="cb13-16" title="16"></a>
+<a class="sourceLine" id="cb13-17" title="17"><span class="kw"><a href="https://rdrr.io/r/base/system.time.html">system.time</a></span>({</a>
+<a class="sourceLine" id="cb13-18" title="18"><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>) {</a>
+<a class="sourceLine" id="cb13-19" title="19">  features &lt;-<span class="st"> </span>purrr<span class="op">::</span><span class="kw"><a href="https://purrr.tidyverse.org/reference/map.html">map_dfc</a></span>(precompiled_filters, <span class="op">~</span><span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span>(<span class="kw">.x</span>(fft_image)))</a>
+<a class="sourceLine" id="cb13-20" title="20">}})</a>
+<a class="sourceLine" id="cb13-21" title="21"><span class="co">#&gt;    user  system elapsed </span></a>
+<a class="sourceLine" id="cb13-22" title="22"><span class="co">#&gt;   2.121   0.001   2.139</span></a></code></pre></div>
 <p>Internally what happens is that, each image gets converted to fourer space, the filter is expanded to the size of the image and converted to fourier space. Multiplied (in fourier space) and the product of the two of them is then converted back to normal space.</p>
 <p>Converting to fourier space is expensive, but if every filter will use the same converted image, that can be calculated once and saved. In the same way, if a filter will be used many times (on images the same size), it can be calculated and used many times.</p>
 </div>
@@ -288,7 +300,8 @@
 <a class="sourceLine" id="cb14-11" title="11"></a>
 <a class="sourceLine" id="cb14-12" title="12">features &lt;-<span class="st"> </span><span class="kw"><a href="../reference/calc_features.html">calc_features</a></span>(</a>
 <a class="sourceLine" id="cb14-13" title="13">  base_image, </a>
-<a class="sourceLine" id="cb14-14" title="14">  <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">11</span>,<span class="dv">15</span>))</a></code></pre></div>
+<a class="sourceLine" id="cb14-14" title="14">  <span class="dt">filter_widths =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">11</span>,<span class="dv">15</span>),</a>
+<a class="sourceLine" id="cb14-15" title="15">  <span class="dt">shape_sizes =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">15</span>, <span class="dv">31</span>))</a></code></pre></div>
 </div>
   </div>
 

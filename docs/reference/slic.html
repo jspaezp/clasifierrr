@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculates a data frame to train classifiers — build_train_multi • clasifierrr</title>
+<title>Generate  superpixel mapping — slic • clasifierrr</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Calculates a data frame to train classifiers — build_train_multi" />
-<meta property="og:description" content="Calculates a data frame to train classifiers" />
+<meta property="og:title" content="Generate  superpixel mapping — slic" />
+<meta property="og:description" content="Performs a variation of kmeans to make virtual pixels." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -121,72 +121,43 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Calculates a data frame to train classifiers</h1>
+    <h1>Generate  superpixel mapping</h1>
     
-    <div class="hidden name"><code>build_train_multi.Rd</code></div>
+    <div class="hidden name"><code>slic.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Calculates a data frame to train classifiers</p>
+    <p>Performs a variation of kmeans to make virtual pixels.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>build_train_multi</span>(
-  <span class='no'>imgs_df</span>,
-  <span class='kw'>train_size_each</span> <span class='kw'>=</span> <span class='fl'>50000</span>,
-  <span class='kw'>preprocess_fun_img</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>preprocess_fun_mask</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>5</span>, <span class='fl'>15</span>, <span class='fl'>31</span>),
-  <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>51</span>, <span class='fl'>101</span>, <span class='fl'>151</span>, <span class='fl'>201</span>, <span class='fl'>251</span>)
-)</pre>
+    <pre class="usage"><span class='fu'>slic</span>(<span class='no'>img</span>, <span class='kw'>num_superpixel</span> <span class='kw'>=</span> <span class='fl'>200</span>, <span class='kw'>compactness</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>imgs_df</th>
-      <td><p>a data frame specifying the masks and images to use, see details</p></td>
+      <th>img</th>
+      <td><p>input image file</p></td>
     </tr>
     <tr>
-      <th>train_size_each</th>
-      <td><p>number of elements to keep for each mask/image combination</p></td>
+      <th>num_superpixel</th>
+      <td><p>number of superpixels</p></td>
     </tr>
     <tr>
-      <th>preprocess_fun_img</th>
-      <td><p>optional, processing function to be applied to each image</p></td>
-    </tr>
-    <tr>
-      <th>preprocess_fun_mask</th>
-      <td><p>optional, processing function to be applied to each mask</p></td>
-    </tr>
-    <tr>
-      <th>filter_widths</th>
-      <td><p>numeric vector with the filter widths to be used</p></td>
+      <th>compactness</th>
+      <td><p>parameter that denotes how similarly related the pixels must be</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>data.frame</p>
+    <p>list of 2 images, one with the averaged colors and one with the indexes</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>params_df</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>tibble</span><span class='kw ns'>::</span><span class='fu'><a href='https://tibble.tidyverse.org/reference/tibble.html'>tibble</a></span>(
-    <span class='kw'>file</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(
-        <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(
-            <span class='st'>"extdata"</span>, <span class='st'>"tiny_4T1-shNT-1_layer1.png"</span>,
-            <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"clasifierrr"</span>),
-        <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(
-            <span class='st'>"extdata"</span>, <span class='st'>"tiny_4T1-shNT-1_layer2.png"</span>,
-            <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"clasifierrr"</span>)),
-    <span class='kw'>classif</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"spheroid"</span>, <span class='st'>"bg"</span>),
-    <span class='kw'>related_file</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(
-        <span class='st'>"extdata"</span>, <span class='st'>"tiny_4T1-shNT-1.png"</span>,
-        <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"clasifierrr"</span>)
-    )
-<span class='no'>trainset</span> <span class='kw'>&lt;-</span> <span class='fu'>build_train_multi</span>(
-    <span class='no'>params_df</span>,
-    <span class='kw'>train_size_each</span> <span class='kw'>=</span> <span class='fl'>5000</span>,
-    <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>,<span class='fl'>5</span>), <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>21</span>, <span class='fl'>51</span>))</div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 8556 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 14056 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Classified objects are of classes {bg: 3069} and {spheroid: 1931}</span>
-#&gt; <span class='message'></span></div><div class='output co'>#&gt; <span class='message'>Returning a data frame of 5000 rows and 11 columns</span></div></pre>
+    <pre class="examples"><div class='input'><span class='no'>x</span> <span class='kw'>=</span> <span class='fu'>readImage</span>(<span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>'images'</span>, <span class='st'>'shapes.png'</span>, <span class='kw'>package</span><span class='kw'>=</span><span class='st'>'EBImage'</span>))</div><div class='output co'>#&gt; <span class='error'>Error in readImage(system.file("images", "shapes.png", package = "EBImage")): could not find function "readImage"</span></div><div class='input'><span class='no'>superpixelated</span> <span class='kw'>&lt;-</span> <span class='fu'>slic</span>(<span class='no'>x</span>)</div><div class='output co'>#&gt; <span class='error'>Error in slic(x): object 'x' not found</span></div><div class='input'>
+<span class='co'># # To display the average color of each superpixel</span>
+<span class='fu'>display</span>(<span class='no'>superpixelated</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='st'>"raster"</span>)</div><div class='output co'>#&gt; <span class='error'>Error in display(superpixelated[[1]], "raster"): could not find function "display"</span></div><div class='input'><span class='co'># # To display a colored version that makes evident the superpixel separations</span>
+<span class='fu'>display</span>(<span class='kw pkg'>EBImage</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/EBImage/man/colorLabels.html'>colorLabels</a></span>(<span class='no'>superpixelated</span><span class='kw'>[[</span><span class='fl'>2</span>]]), <span class='st'>"raster"</span>)</div><div class='output co'>#&gt; <span class='error'>Error in display(EBImage::colorLabels(superpixelated[[2]]), "raster"): could not find function "display"</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

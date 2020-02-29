@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculates a data frame to train classifiers — build_train_multi • clasifierrr</title>
+<title>Generate an edge image of a mask, based on an image — generate_edges • clasifierrr</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Calculates a data frame to train classifiers — build_train_multi" />
-<meta property="og:description" content="Calculates a data frame to train classifiers" />
+<meta property="og:title" content="Generate an edge image of a mask, based on an image — generate_edges" />
+<meta property="og:description" content="Generate an edge image of a mask, based on an image" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -121,72 +121,46 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Calculates a data frame to train classifiers</h1>
+    <h1>Generate an edge image of a mask, based on an image</h1>
     
-    <div class="hidden name"><code>build_train_multi.Rd</code></div>
+    <div class="hidden name"><code>generate_edges.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Calculates a data frame to train classifiers</p>
+    <p>Generate an edge image of a mask, based on an image</p>
     </div>
 
-    <pre class="usage"><span class='fu'>build_train_multi</span>(
-  <span class='no'>imgs_df</span>,
-  <span class='kw'>train_size_each</span> <span class='kw'>=</span> <span class='fl'>50000</span>,
-  <span class='kw'>preprocess_fun_img</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>preprocess_fun_mask</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>5</span>, <span class='fl'>15</span>, <span class='fl'>31</span>),
-  <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>51</span>, <span class='fl'>101</span>, <span class='fl'>151</span>, <span class='fl'>201</span>, <span class='fl'>251</span>)
-)</pre>
+    <pre class="usage"><span class='fu'>generate_edges</span>(<span class='no'>img</span>, <span class='no'>mask</span>, <span class='kw'>opac</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span>, <span class='fl'>0.2</span>), <span class='kw'>cols</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"#440154FF"</span>, <span class='st'>"#FDE725FF"</span>))</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>imgs_df</th>
-      <td><p>a data frame specifying the masks and images to use, see details</p></td>
+      <th>img</th>
+      <td><p>image</p></td>
     </tr>
     <tr>
-      <th>train_size_each</th>
-      <td><p>number of elements to keep for each mask/image combination</p></td>
+      <th>mask</th>
+      <td><p>mask</p></td>
     </tr>
     <tr>
-      <th>preprocess_fun_img</th>
-      <td><p>optional, processing function to be applied to each image</p></td>
+      <th>opac</th>
+      <td><p>numeric vector o length 2 with the opacity of the overlaid colours</p></td>
     </tr>
     <tr>
-      <th>preprocess_fun_mask</th>
-      <td><p>optional, processing function to be applied to each mask</p></td>
-    </tr>
-    <tr>
-      <th>filter_widths</th>
-      <td><p>numeric vector with the filter widths to be used</p></td>
+      <th>cols</th>
+      <td><p>color of the outline and fill that will be used</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>data.frame</p>
+    
+
+
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>params_df</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>tibble</span><span class='kw ns'>::</span><span class='fu'><a href='https://tibble.tidyverse.org/reference/tibble.html'>tibble</a></span>(
-    <span class='kw'>file</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(
-        <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(
-            <span class='st'>"extdata"</span>, <span class='st'>"tiny_4T1-shNT-1_layer1.png"</span>,
-            <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"clasifierrr"</span>),
-        <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(
-            <span class='st'>"extdata"</span>, <span class='st'>"tiny_4T1-shNT-1_layer2.png"</span>,
-            <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"clasifierrr"</span>)),
-    <span class='kw'>classif</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"spheroid"</span>, <span class='st'>"bg"</span>),
-    <span class='kw'>related_file</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(
-        <span class='st'>"extdata"</span>, <span class='st'>"tiny_4T1-shNT-1.png"</span>,
-        <span class='kw'>package</span> <span class='kw'>=</span> <span class='st'>"clasifierrr"</span>)
-    )
-<span class='no'>trainset</span> <span class='kw'>&lt;-</span> <span class='fu'>build_train_multi</span>(
-    <span class='no'>params_df</span>,
-    <span class='kw'>train_size_each</span> <span class='kw'>=</span> <span class='fl'>5000</span>,
-    <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>,<span class='fl'>5</span>), <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>21</span>, <span class='fl'>51</span>))</div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 8556 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 14056 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Classified objects are of classes {bg: 3069} and {spheroid: 1931}</span>
-#&gt; <span class='message'></span></div><div class='output co'>#&gt; <span class='message'>Returning a data frame of 5000 rows and 11 columns</span></div></pre>
+    <pre class="examples"><div class='input'><span class='no'>x</span> <span class='kw'>=</span> <span class='fu'>readImage</span>(<span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>'images'</span>, <span class='st'>'shapes.png'</span>, <span class='kw'>package</span><span class='kw'>=</span><span class='st'>'EBImage'</span>))</div><div class='output co'>#&gt; <span class='error'>Error in readImage(system.file("images", "shapes.png", package = "EBImage")): could not find function "readImage"</span></div><div class='input'><span class='no'>sobel</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='sobel_filter.html'>sobel_filter</a></span>(<span class='no'>x</span>)</div><div class='output co'>#&gt; <span class='error'>Error in prep_filter.filter(filter = filter, dim_x_proc = dim(img)): object 'x' not found</span></div><div class='input'><span class='no'>edges</span> <span class='kw'>&lt;-</span> <span class='fu'>generate_edges</span>(<span class='no'>x</span>, <span class='no'>sobel</span> <span class='kw'>&lt;</span> <span class='fl'>0.5</span>)</div><div class='output co'>#&gt; <span class='error'>Error in EBImage::Image(c(img, img, img), dim = c(dim(img), 3), colormode = EBImage::Color): object 'x' not found</span></div><div class='input'><span class='fu'>display</span>(<span class='no'>edges</span>, <span class='st'>"raster"</span>)</div><div class='output co'>#&gt; <span class='error'>Error in display(edges, "raster"): could not find function "display"</span></div><div class='input'><span class='fu'>display</span>(<span class='fu'>generate_edges</span>(<span class='no'>x</span>, <span class='kw pkg'>EBImage</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/EBImage/man/fillHull.html'>fillHull</a></span>(<span class='no'>sobel</span> <span class='kw'>&gt;</span> <span class='fl'>0.5</span>)), <span class='st'>"raster"</span>)</div><div class='output co'>#&gt; <span class='error'>Error in display(generate_edges(x, EBImage::fillHull(sobel &gt; 0.5)), "raster"): could not find function "display"</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
