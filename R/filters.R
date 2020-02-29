@@ -263,10 +263,11 @@ donut_kernell <- function(width, tolerance) {
 #'
 #' @return image
 #' @export
+#' @family filters
 #'
 #' @examples
 #' @importFrom EBImage dilate makeBrush filter2
-circular_hough <- function(img, width, sobel_width, tolerance = 5) {
+circular_hough_transform <- function(img, width, sobel_width, tolerance = 11) {
     kernell <- donut_kernell(width, tolerance)
     trans <- sobel_filter(img, sobel_width)
     trans <- trans > 0.5
@@ -275,23 +276,82 @@ circular_hough <- function(img, width, sobel_width, tolerance = 5) {
     return(trans)
 }
 
+#' @describeIn circular_hough_transform pre-calculates parameters and returns a function
 #' @export
-compile_circular_hough <- function(width, sobel_width, dim_img, tolerance = 5) {
+compile_circular_hough <- function(width, sobel_width, dim_img, tolerance = 11) {
     # This would be the sigma for the largest ...
     compiled_sobel <- compile_sobel_filter(sobel_width, dim_img)
     donut_kern <- donut_kernell(width, tolerance)
     fun_hough_circular <- prep_filter.filter(donut_kern, dim_img)
 
     .filter <- function(img) {
-        hough_img <- fun_hough_circular(compiled_sobel(img))
+        img <- compiled_sobel(img)
+        img <- img > 0.5
+        hough_img <- fun_hough_circular(img)
         return(hough_img)
     }
 
     return(.filter)
 }
 
+#' @describeIn hough_circle_draw pre-calculates parameters and returns a function
+#' @export
+compile_hough_circle_draw <- function(width, sobel_width, dim_img,
+                                      tolerance = 11, pct_max = 0.95,
+                                      blurr = 1/8){
+    compiled_circ_hough <- compile_circular_hough(
+        width = width, sobel_width = sobel_width,
+        dim_img = dim_img, tolerance = tolerance)
 
-hough_circles <- function(img,
+    .filter <- function(img) {
+        img <- compiled_circ_hough(img)
+        near_max_vals <- img > pct_max * max(img)
+        img[] <- as.numeric(near_max_vals)
+
+        img <- EBImage::dilate(img, EBImage::makeBrush(width, "disc"))
+        img <- EBImage::gblur(img, sigma = width * blurr)
+        return(img)
+    }
+
+    return(.filter)
+}
+
+
+#' Calculates a circular hough transform and draws the predicted circles
+#'
+#' This transform accentuates circular shapes
+#'
+#' @inheritParams circular_hough_transform
+#' @param pct_max the percentage of the maximum intensity that is considered to
+#'                draw the circles (defaults to 0.95, anyting 95% of the highest
+#'                intensity)
+#' @param blurra numeric value indicating the ratio of the width to blurr,
+#'               1 means have the blurr be the same as the circle width
+#'
+#' @return image
+#' @export
+#' @family filters
+#'
+#' @examples
+#' @importFrom EBImage gblur makeBrush
+hough_circle_draw <- function(img, width, sobel_width,
+                              tolerance, pct_max = 0.95,
+                              blurr = 1/8) {
+    hough_trans <- circular_hough_transform(
+        img = img, width = width,
+        sobel_width = sobel_width,
+        tolerance = tolerance)
+
+    near_max_vals <- hough_trans > pct_max * max(hough_trans)
+    hough_trans[] <- as.numeric(near_max_vals)
+
+    x <- EBImage::dilate(hough_trans, EBImage::makeBrush(width, "disc"))
+    x <- EBImage::gblur(x, sigma = width * blurr)
+    return(x)
+}
+
+# Experimental
+hough_circles_max <- function(img,
                           radii = seq(from = 51, to = 601, by = 20),
                           sobel_width = 5,
                           quantile_draw = 0.9,
@@ -300,10 +360,13 @@ hough_circles <- function(img,
     radii <- as.integer(radii)
     radii[radii %% 2 == 0] <- radii[radii %% 2 == 0] + 1
 
+    # In This section, the transform could be saved in mem
+    # if calculating an dditional transform later is too expensive
     maxpoint <- purrr::map_dbl(
         radii,
-        ~ max(circular_hough(img, .x, sobel_width = sobel_width,
+        ~ max(circular_hough_transform(img, .x, sobel_width = sobel_width,
                              tolerance = tolerance)))
+
 
 
     # Normalization is no longer required due to a change in the weighting
@@ -313,14 +376,14 @@ hough_circles <- function(img,
     best_radius <- radii[which.max(norm_max)]
     message("Selecting ", best_radius, " as the best radius for the circles")
 
-    hough_trans <- circular_hough(
+    hough_trans <- circular_hough_transform(
         img, best_radius,
         sobel_width, tolerance = tolerance)
 
     near_max_vals <- hough_trans > quantile_draw * max(hough_trans)
     hough_trans[] <- as.numeric(near_max_vals)
 
-    x <- dilate(hough_trans, makeBrush(best_radius, "disc"))
+    x <- EBImage::dilate(hough_trans, EBImage::makeBrush(best_radius, "disc"))
 
     return(x)
 }
