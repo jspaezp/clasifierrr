@@ -234,6 +234,7 @@ compile_dog_filter <- function(width, dim_img,
     return(.filter)
 }
 
+
 donut_kernell <- function(width, tolerance) {
     tw <- tolerance + width
     if (tw %% 2 == 0) {
@@ -249,7 +250,8 @@ donut_kernell <- function(width, tolerance) {
     if (tolerance != 0) {
         x <- EBImage::dilate(x, EBImage::makeBrush(tolerance, "disc"))
     }
-    kernell <- x/sum(x)
+    kernell <- x
+    #kernell <- x/sum(x)
 
     return(kernell)
 }
@@ -292,6 +294,8 @@ compile_circular_hough <- function(width, sobel_width, dim_img, tolerance = 11) 
     fun_hough_circular <- prep_filter.filter(donut_kern, dim_img)
 
     .filter <- function(img) {
+
+        # This section can be reused between radii
         if (is.complex(img)) {
             img <- Re(fftwtools::fftw2d(img, inverse = TRUE)/prod(dim(img)))
         }
@@ -299,7 +303,10 @@ compile_circular_hough <- function(width, sobel_width, dim_img, tolerance = 11) 
         img <- compiled_sobel(img)
         img <- clean_image_border(img, sobel_width)
         img <- img > 0.5
+        # Up to here
         hough_img <- fun_hough_circular(img)
+
+        # And the following one might not be needed ...
         hough_img <- EBImage::filter2(hough_img, makeBrush(tolerance, "disc"), boundary = 0)
 
         return(hough_img)
@@ -340,8 +347,8 @@ compile_hough_circle_draw <- function(width, sobel_width, dim_img,
 #' @param pct_max the percentage of the maximum intensity that is considered to
 #'                draw the circles (defaults to 0.95, anyting 95% of the highest
 #'                intensity)
-#' @param blurra numeric value indicating the ratio of the width to blurr,
-#'               1 means have the blurr be the same as the circle width
+#' @param blurr numeric value indicating the ratio of the width to blurr,
+#'              1 means have the blurr be the same as the circle width
 #'
 #' @return image
 #' @export
@@ -373,43 +380,127 @@ hough_circle_draw <- function(img, width, sobel_width,
     return(x)
 }
 
-# Experimental
-hough_circles_max <- function(img,
-                          radii = seq(from = 51, to = 601, by = 20),
-                          sobel_width = 5,
-                          quantile_draw = 0.9,
-                          tolerance = 21) {
-    # TECHNICALLY SPEAKING, this would be the diameter ...
-    radii <- as.integer(radii)
-    radii[radii %% 2 == 0] <- radii[radii %% 2 == 0] + 1
-
-    # In This section, the transform could be saved in mem
-    # if calculating an dditional transform later is too expensive
-    maxpoint <- purrr::map_dbl(
-        radii,
-        ~ max(circular_hough_transform(img, .x, sobel_width = sobel_width,
-                             tolerance = tolerance)))
 
 
 
-    # Normalization is no longer required due to a change in the weighting
-    # kernell (donut)
-    norm_max <- maxpoint
-
-    best_radius <- radii[which.max(norm_max)]
-    message("Selecting ", best_radius, " as the best radius for the circles")
-
-    hough_trans <- circular_hough_transform(
-        img, best_radius,
-        sobel_width, tolerance = tolerance)
-
-    near_max_vals <- hough_trans > quantile_draw * max(hough_trans)
-    hough_trans[] <- as.numeric(near_max_vals)
-
-    x <- EBImage::dilate(hough_trans, EBImage::makeBrush(best_radius, "disc"))
-
-    return(x)
+circular_hough_preprocess <- function(img, sobel_width) {
+    # kernell <- donut_kernell(width, tolerance)
+    trans <- EBImage::medianFilter(img, 3)
+    trans <- sobel_filter(trans, sobel_width)
+    trans <- clean_image_border(trans, sobel_width)
+    trans <- trans > 0.5
+    return(trans)
 }
+
+circular_hough_postprocess <- function(img, width, tolerance = 11) {
+    kernell <- donut_kernell(width, tolerance)
+    trans <- EBImage::filter2(img, kernell, boundary = 0)
+    trans <- EBImage::filter2(trans, makeBrush(tolerance, "disc"), boundary = 0)
+    return(trans)
+}
+
+
+pane_circ_hough <- function(img, diameters, sobel_width, tolerance) {
+    pp_img <- circular_hough_preprocess(img, sobel_width)
+    # fft_img <- fftwtools::fftw2d(img)
+
+    diameters <- as.integer(diameters)
+    diameters[diameters %% 2 == 0] <- diameters[diameters %% 2 == 0] + 1
+    imgs <- purrr::map(
+        diameters,
+        ~ circular_hough_postprocess(pp_img, .x, tolerance))
+
+    return(imgs)
+}
+
+#' Calculates a circular hough on multiple radius and draws the best predicted circle
+#'
+#' This transform accentuates circular shapes
+#'
+#' @param img image to transform
+#' @param diameters diameters to go though
+#' @param sobel_width width of the sobel filter that will be used to detect the edges
+#' @param tolerance the position tolerance to be used during the transform
+#'
+#' @return image
+#' @export
+#' @family filters
+#'
+#' @examples
+#' x = readImage(system.file('images', 'shapes.png', package='EBImage'))
+#' hough <- hough_circles_max(x, seq(from = 5, to = 101, by = 2), 3, 1)
+#' display(hough, "raster")
+#' display(x, "raster")
+#' @importFrom EBImage gblur makeBrush
+hough_circles_max <- function(img,
+                              diameters = seq(from = 21, to = 501, by = 20),
+                              sobel_width = 5,
+                              tolerance = 21) {
+
+    diameters <- as.integer(diameters)
+    diameters[diameters %% 2 == 0] <- diameters[diameters %% 2 == 0] + 1
+    diameters <- sort(diameters)
+
+
+    imgs_out <- pane_circ_hough(
+        img = img, diameters = diameters,
+        sobel_width = sobel_width,
+        tolerance = tolerance)
+
+    # purrr::walk(imgs_out, ~ display(normalize(.x), "raster"))
+
+    max_ints <- purrr::map_dbl(imgs_out, ~ max(.x))
+
+    dx <- diff(max_ints)
+
+    # Right not it finds flobal maxims only
+    local_maxims <- which(diff(dx/abs(dx)) == -2) + 1
+
+    # print(diff(dx/abs(dx)))
+    # plot(dx)
+
+    blank_img <- matrix(0, nrow = nrow(img), ncol = ncol(img))
+    ret_img <- blank_img
+
+    for (local_max in local_maxims) {
+        max_val <- which(as.numeric(imgs_out[[local_max]]) > max_ints[[local_max]] - 1)
+
+        d1 <- max_val %% nrow(img)
+        d2 <- max_val %/% nrow(img)
+
+        local_ret_img <- EBImage::drawCircle(
+            blank_img,
+            x = d1, y = d2,
+            radius = diameters[[local_max]] %/% 2,
+            col = 1, fill = TRUE)
+
+        suppressWarnings({
+            local_ret_img <- EBImage::gblur(
+                local_ret_img, sigma = diameters[[local_max]] * (1/4),
+                radius = diameters[[local_max]] %/% 2 + 1)
+        })
+
+        ret_img <- ret_img + local_ret_img
+    }
+
+    ret_img[ret_img > 1] <- 1
+
+    #
+
+    ## Section reserved when implementing a second pass to find the maxima
+    # opaque_circle <- function(img) {
+    #    drawCircle(img, x = d1, y = d2,
+    #               radius = diams[[8]] %/% 2,
+    #               col = 0, fill = TRUE)
+    #}
+    #second_pass <- map(imgs_out, ~ opaque_circle(.x))
+    #purrr::walk(second_pass, ~ display(normalize(.x), "raster"))
+    #plot(purrr::map_dbl(second_pass, ~ max(.x)))
+
+    return(ret_img)
+}
+
+
 
 
 

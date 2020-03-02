@@ -33,7 +33,7 @@
 #' @importFrom furrr future_map future_map_dfc
 #' @importFrom EBImage Image makeBrush filter2
 calc_features <- function(img, filter_widths = c(3,5,11,23),
-                          shape_sizes = c(25, 51),
+                          shape_sizes = c(min(dim(img))/10, min(dim(img))*0.75),
                           verbose = FALSE){
     start_time <- Sys.time()
     if (verbose) message(
@@ -76,7 +76,7 @@ calc_features <- function(img, filter_widths = c(3,5,11,23),
 #' @export
 compile_calc_features <- function(
     filter_widths = c(3,5,11,23),
-    shape_sizes = c(25, 51),
+    shape_sizes = c(min(img_dim)/10, min(img_dim)*0.75),
     img_dim,
     verbose = FALSE) {
 
@@ -118,15 +118,20 @@ compile_calc_features <- function(
 
     names(v_funs) <-  paste0("var_filt_", filter_widths)
 
-    trans_funs <- purrr::map(
-        shape_sizes,
-        ~ compile_hough_circle_draw(
-            width = .x, sobel_width = 5,
-            dim_img = img_dim, tolerance = 15,
-            pct_max = 0.95, blurr = 1/8)
-    )
+    trans_funs <- list(function(img) {
+        if (is.complex(img)) {
+            img <- Re(fftwtools::fftw2d(img, inverse = TRUE)/prod(dim(img)))
+        }
+        hough_circles_max(
+            img,
+            diameters = seq(
+                from = min(shape_sizes),
+                to = max(shape_sizes),
+                length.out = 15),
+            5, 21)
+    })
 
-    names(trans_funs) <- paste0("c_hough_trans_", shape_sizes)
+    names(trans_funs) <- paste0("c_hough")
 
     ret_funs <- c(g_funs, dog_funs, v_funs, sobel_funs, trans_funs)
 
