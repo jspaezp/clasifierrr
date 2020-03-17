@@ -1,5 +1,26 @@
 
 
+#' Makes sure a number is odd
+#'
+#' Since many of the 2d filtering functions rely on having odd numbers for the
+#' kernell sizes, it makes sense to have a function that assures numbers being
+#' odd, this functions gets a number, makes it a integer and adds 1 if the
+#' number is even, then removes duplicates.
+#'
+#' @param num numeric vector
+#'
+#' @return
+#' @export
+#'
+#' @examples
+make_odd <- function(num) {
+    num <- as.integer(num)
+    num <- num + ((num + 1) %% 2)
+    num <- as.integer(unique(num))
+    num <- num[num > 0]
+    return(num)
+}
+
 
 #' Generate an overlaid image of a mask and a base image
 #'

@@ -33,7 +33,10 @@
 #' @importFrom furrr future_map future_map_dfc
 #' @importFrom EBImage Image makeBrush filter2
 calc_features <- function(img, filter_widths = c(3,5,11,23),
-                          shape_sizes = c(min(dim(img))/10, min(dim(img))*0.75),
+                          shape_sizes = seq(
+                              from = min(dim(img))/10,
+                              to = min(dim(img))*0.75,
+                              length.out = 3),
                           verbose = FALSE){
     start_time <- Sys.time()
     if (verbose) message(
@@ -74,11 +77,13 @@ calc_features <- function(img, filter_widths = c(3,5,11,23),
 
 #' @describeIn calc_features returns a named list of functions that can be applied to an image
 #' @export
-compile_calc_features <- function(
-    filter_widths = c(3,5,11,23),
-    shape_sizes = c(min(img_dim)/10, min(img_dim)*0.75),
-    img_dim,
-    verbose = FALSE) {
+compile_calc_features <- function(filter_widths = c(3,5,11,23),
+                                  shape_sizes = seq(
+                                      from = min(dim(img))/10,
+                                      to = min(dim(img))*0.75,
+                                      length.out = 3),
+                                  img_dim,
+                                  verbose = FALSE) {
 
     start_time <- Sys.time()
     if (verbose) message("Starting to compile features filters for image of dims {",
@@ -118,20 +123,29 @@ compile_calc_features <- function(
 
     names(v_funs) <-  paste0("var_filt_", filter_widths)
 
-    trans_funs <- list(function(img) {
-        if (is.complex(img)) {
-            img <- Re(fftwtools::fftw2d(img, inverse = TRUE)/prod(dim(img)))
-        }
-        hough_circles_max(
-            img,
-            diameters = seq(
-                from = min(shape_sizes),
-                to = max(shape_sizes),
-                length.out = 15),
-            5, 21)
-    })
+    make_hough_functions <- function(shape_size) {
+        diameters <- make_odd(seq(
+            from = shape_size * 0.5,
+            to = shape_size * 1.2,
+            length.out = 15))
 
-    names(trans_funs) <- paste0("c_hough")
+        ret_fun <- function(img) {
+            if (is.complex(img)) {
+                img <- Re(fftwtools::fftw2d(img, inverse = TRUE)/prod(dim(img)))
+            }
+            hough_circles_max(
+                img,
+                diameters = diameters,
+                sobel_width = 5,
+                tolerance = 21)
+        }
+    }
+
+    trans_funs <- purrr::map(
+        shape_sizes,
+        ~ make_hough_functions(shape_size = .x))
+
+    names(trans_funs) <- paste0("c_hough_", shape_sizes)
 
     ret_funs <- c(g_funs, dog_funs, v_funs, sobel_funs, trans_funs)
 
