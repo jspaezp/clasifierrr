@@ -8,13 +8,13 @@
 calc_features(
   img,
   filter_widths = c(3, 5, 11, 23),
-  shape_sizes = c(51, 101, 151, 201, 251),
+  shape_sizes = seq(from = min(dim(img))/10, to = min(dim(img)) * 0.7, length.out = 3),
   verbose = FALSE
 )
 
 compile_calc_features(
   filter_widths = c(3, 5, 11, 23),
-  shape_sizes = c(51, 101, 151, 201, 251),
+  shape_sizes = seq(from = min(img_dim)/10, to = min(img_dim) * 0.75, length.out = 3),
   img_dim,
   verbose = FALSE
 )

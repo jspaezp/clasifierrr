@@ -9,8 +9,7 @@ build_train_multi(
   train_size_each = 50000,
   preprocess_fun_img = NULL,
   preprocess_fun_mask = NULL,
-  filter_widths = c(3, 5, 15, 31),
-  shape_sizes = c(51, 101, 151, 201, 251)
+  ...
 )
 }
 \arguments{
@@ -22,7 +21,7 @@ build_train_multi(
 
 \item{preprocess_fun_mask}{optional, processing function to be applied to each mask}
 
-\item{filter_widths}{numeric vector with the filter widths to be used}
+\item{...}{additional arguments passed to `calc_features`}
 }
 \value{
 data.frame
@@ -48,4 +47,7 @@ trainset <- build_train_multi(
     params_df,
     train_size_each = 5000,
     filter_widths = c(3,5), shape_sizes = c(21, 51))
+}
+\seealso{
+
 }

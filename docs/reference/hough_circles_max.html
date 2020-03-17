@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>predict_img: Classify pixels based on models and features — predict_img • clasifierrr</title>
+<title>Calculates a circular hough on multiple radius and draws the best predicted circle — hough_circles_max • clasifierrr</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="predict_img: Classify pixels based on models and features — predict_img" />
-<meta property="og:description" content="A wrapper that handles classifier models to output images" />
+<meta property="og:title" content="Calculates a circular hough on multiple radius and draws the best predicted circle — hough_circles_max" />
+<meta property="og:description" content="This transform accentuates circular shapes" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -121,70 +121,64 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>predict_img: Classify pixels based on models and features</h1>
+    <h1>Calculates a circular hough on multiple radius and draws the best predicted circle</h1>
     
-    <div class="hidden name"><code>predict_img.Rd</code></div>
+    <div class="hidden name"><code>hough_circles_max.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>A wrapper that handles classifier models to output images</p>
+    <p>This transform accentuates circular shapes</p>
     </div>
 
-    <pre class="usage"><span class='fu'>predict_img</span>(<span class='no'>x</span>, <span class='no'>...</span>)
-
-<span class='co'># S3 method for glm</span>
-<span class='fu'>predict_img</span>(<span class='no'>x</span>, <span class='no'>feature_frame</span>, <span class='no'>...</span>)
-
-<span class='co'># S3 method for ranger</span>
-<span class='fu'>predict_img</span>(<span class='no'>x</span>, <span class='no'>feature_frame</span>, <span class='no'>...</span>)
-
-<span class='co'># S3 method for ksvm</span>
-<span class='fu'>predict_img</span>(<span class='no'>x</span>, <span class='no'>feature_frame</span>, <span class='no'>...</span>)
-
-<span class='co'># S3 method for default</span>
-<span class='fu'>predict_img</span>(<span class='no'>x</span>, <span class='no'>feature_frame</span>, <span class='no'>...</span>)
-
-<span class='co'># S3 method for glmnet</span>
-<span class='fu'>predict_img</span>(<span class='no'>x</span>, <span class='no'>feature_frame</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>hough_circles_max</span>(
+  <span class='no'>img</span>,
+  <span class='kw'>diameters</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='kw'>from</span> <span class='kw'>=</span> <span class='fl'>21</span>, <span class='kw'>to</span> <span class='kw'>=</span> <span class='fl'>501</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>20</span>),
+  <span class='kw'>sobel_width</span> <span class='kw'>=</span> <span class='fl'>5</span>,
+  <span class='kw'>tolerance</span> <span class='kw'>=</span> <span class='fl'>21</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>model to use for classification</p></td>
+      <th>img</th>
+      <td><p>image to transform</p></td>
     </tr>
     <tr>
-      <th>...</th>
-      <td><p>Additional arguments, passed to `predict`</p></td>
+      <th>diameters</th>
+      <td><p>diameters to go though</p></td>
     </tr>
     <tr>
-      <th>feature_frame</th>
-      <td><p>a data frame with the features</p></td>
+      <th>sobel_width</th>
+      <td><p>width of the sobel filter that will be used to detect the edges</p></td>
+    </tr>
+    <tr>
+      <th>tolerance</th>
+      <td><p>the position tolerance to be used during the transform</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p><code>NULL</code></p>
-<p><code>NULL</code></p>
-<p><code>NULL</code></p>
-<p><code>NULL</code></p>
-<p><code>NULL</code></p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <p>image</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <p>It is a fairly thin wrapper arround `predict`.</p>
+    <div class='dont-index'><p>Other filters: 
+<code><a href='circular_hough_transform.html'>circular_hough_transform</a>()</code>,
+<code><a href='hough_circle_draw.html'>compile_hough_circle_draw</a>()</code>,
+<code><a href='sobel_filter.html'>compile_sobel_filter</a>()</code>,
+<code><a href='variance_filter.html'>compile_variance_filter</a>()</code>,
+<code><a href='dog_filter.html'>dog_filter</a>()</code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-</div></pre>
+    <pre class="examples"><div class='input'><span class='no'>x</span> <span class='kw'>=</span> <span class='fu'>readImage</span>(<span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>'images'</span>, <span class='st'>'shapes.png'</span>, <span class='kw'>package</span><span class='kw'>=</span><span class='st'>'EBImage'</span>))</div><div class='output co'>#&gt; <span class='error'>Error in readImage(system.file("images", "shapes.png", package = "EBImage")): could not find function "readImage"</span></div><div class='input'><span class='no'>hough</span> <span class='kw'>&lt;-</span> <span class='fu'>hough_circles_max</span>(<span class='no'>x</span>, <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='kw'>from</span> <span class='kw'>=</span> <span class='fl'>5</span>, <span class='kw'>to</span> <span class='kw'>=</span> <span class='fl'>101</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>2</span>), <span class='fl'>3</span>, <span class='fl'>1</span>)</div><div class='output co'>#&gt; <span class='error'>Error in EBImage::medianFilter(img, 3): object 'x' not found</span></div><div class='input'><span class='fu'>display</span>(<span class='no'>hough</span>, <span class='st'>"raster"</span>)</div><div class='output co'>#&gt; <span class='error'>Error in display(hough, "raster"): could not find function "display"</span></div><div class='input'><span class='fu'>display</span>(<span class='no'>x</span>, <span class='st'>"raster"</span>)</div><div class='output co'>#&gt; <span class='error'>Error in display(x, "raster"): could not find function "display"</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
-      <li><a href="#details">Details</a></li>
+      <li><a href="#see-also">See also</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>
 

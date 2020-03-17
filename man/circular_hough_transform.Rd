@@ -37,6 +37,7 @@ Other filters:
 \code{\link{compile_hough_circle_draw}()},
 \code{\link{compile_sobel_filter}()},
 \code{\link{compile_variance_filter}()},
-\code{\link{dog_filter}()}
+\code{\link{dog_filter}()},
+\code{\link{hough_circles_max}()}
 }
 \concept{filters}

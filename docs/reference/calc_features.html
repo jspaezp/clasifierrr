@@ -70,7 +70,7 @@ difference of gaussians, adds as well the position in the image" />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">clasifierrr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
       </span>
     </div>
 
@@ -135,13 +135,13 @@ difference of gaussians, adds as well the position in the image</p>
     <pre class="usage"><span class='fu'>calc_features</span>(
   <span class='no'>img</span>,
   <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>5</span>, <span class='fl'>11</span>, <span class='fl'>23</span>),
-  <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>51</span>, <span class='fl'>101</span>, <span class='fl'>151</span>, <span class='fl'>201</span>, <span class='fl'>251</span>),
+  <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='kw'>from</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span>(<span class='no'>img</span>))/<span class='fl'>10</span>, <span class='kw'>to</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span>(<span class='no'>img</span>)) * <span class='fl'>0.7</span>, <span class='kw'>length.out</span> <span class='kw'>=</span> <span class='fl'>3</span>),
   <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
 )
 
 <span class='fu'>compile_calc_features</span>(
   <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>5</span>, <span class='fl'>11</span>, <span class='fl'>23</span>),
-  <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>51</span>, <span class='fl'>101</span>, <span class='fl'>151</span>, <span class='fl'>201</span>, <span class='fl'>251</span>),
+  <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='kw'>from</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span>(<span class='no'>img_dim</span>)/<span class='fl'>10</span>, <span class='kw'>to</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Extremes.html'>min</a></span>(<span class='no'>img_dim</span>) * <span class='fl'>0.75</span>, <span class='kw'>length.out</span> <span class='kw'>=</span> <span class='fl'>3</span>),
   <span class='no'>img_dim</span>,
   <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
 )</pre>
@@ -184,17 +184,17 @@ size of the shapes to be found</p></td>
 <span class='no'>feature_df</span> <span class='kw'>&lt;-</span> <span class='fu'>calc_features</span>(
     <span class='no'>test_image</span>, <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>,<span class='fl'>5</span>),
     <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>11</span>, <span class='fl'>21</span>))
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='no'>feature_df</span>)</div><div class='output co'>#&gt; # A tibble: 6 x 10
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='no'>feature_df</span>)</div><div class='output co'>#&gt; <span style='color: #555555;'># A tibble: 6 x 10</span><span>
 #&gt;   gauss_filt_3 gauss_filt_5 DoG_filt_3 DoG_filt_5 var_filt_3 var_filt_5
-#&gt;          &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
-#&gt; 1        0.362        0.412    5.54e-9     0.0497     0.0982     0.0810
-#&gt; 2        0.433        0.538    1.86e-8     0.105      0.106      0.0780
-#&gt; 3        0.643        0.581   -1.18e-8    -0.0623     0.0743     0.0927
-#&gt; 4        0.343        0.395    7.19e-9     0.0516     0.0522     0.0854
-#&gt; 5        0.313        0.425    1.82e-8     0.112      0.0507     0.0690
-#&gt; 6        0.687        0.669   -2.85e-9    -0.0186     0.0558     0.0595
-#&gt; # … with 4 more variables: sobel_filt_3 &lt;dbl&gt;, sobel_filt_5 &lt;dbl&gt;,
-#&gt; #   c_hough_trans_11 &lt;dbl&gt;, c_hough_trans_21 &lt;dbl&gt;</div><div class='input'>
+#&gt;          </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>        </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
+#&gt; </span><span style='color: #555555;'>1</span><span>        0.362        0.412    5.54</span><span style='color: #555555;'>e</span><span style='color: #BB0000;'>-9</span><span>     0.049</span><span style='text-decoration: underline;'>7</span><span>     0.098</span><span style='text-decoration: underline;'>2</span><span>     0.081</span><span style='text-decoration: underline;'>0</span><span>
+#&gt; </span><span style='color: #555555;'>2</span><span>        0.433        0.538    1.86</span><span style='color: #555555;'>e</span><span style='color: #BB0000;'>-8</span><span>     0.105      0.106      0.078</span><span style='text-decoration: underline;'>0</span><span>
+#&gt; </span><span style='color: #555555;'>3</span><span>        0.643        0.581   -</span><span style='color: #BB0000;'>1.18</span><span style='color: #555555;'>e</span><span style='color: #BB0000;'>-8</span><span>    -</span><span style='color: #BB0000;'>0.062</span><span style='color: #BB0000;text-decoration: underline;'>3</span><span>     0.074</span><span style='text-decoration: underline;'>3</span><span>     0.092</span><span style='text-decoration: underline;'>7</span><span>
+#&gt; </span><span style='color: #555555;'>4</span><span>        0.343        0.395    7.19</span><span style='color: #555555;'>e</span><span style='color: #BB0000;'>-9</span><span>     0.051</span><span style='text-decoration: underline;'>6</span><span>     0.052</span><span style='text-decoration: underline;'>2</span><span>     0.085</span><span style='text-decoration: underline;'>4</span><span>
+#&gt; </span><span style='color: #555555;'>5</span><span>        0.313        0.425    1.82</span><span style='color: #555555;'>e</span><span style='color: #BB0000;'>-8</span><span>     0.112      0.050</span><span style='text-decoration: underline;'>7</span><span>     0.069</span><span style='text-decoration: underline;'>0</span><span>
+#&gt; </span><span style='color: #555555;'>6</span><span>        0.687        0.669   -</span><span style='color: #BB0000;'>2.85</span><span style='color: #555555;'>e</span><span style='color: #BB0000;'>-9</span><span>    -</span><span style='color: #BB0000;'>0.018</span><span style='color: #BB0000;text-decoration: underline;'>6</span><span>     0.055</span><span style='text-decoration: underline;'>8</span><span>     0.059</span><span style='text-decoration: underline;'>5</span><span>
+#&gt; </span><span style='color: #555555;'># … with 4 more variables: sobel_filt_3 </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, sobel_filt_5 </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>,
+#&gt; #   c_hough_11 </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, c_hough_21 </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span></div><div class='input'>
 <span class='no'>feature_funs</span> <span class='kw'>&lt;-</span> <span class='fu'>compile_calc_features</span>(
      <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>,<span class='fl'>5</span>), <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>11</span>, <span class='fl'>21</span>),
      <span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span>(<span class='no'>test_image</span>))
@@ -1933,18 +1933,18 @@ size of the shapes to be found</p></td>
 #&gt; [100,] 0.33213368 0.3807034155 0.21652910 0.71680996 0.01443768
 #&gt; [101,] 0.27974744 0.2197865921 0.24649975 0.33006587 0.66726248</div><div class='input'>
 <span class='no'>feature_df2</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>purrr</span><span class='kw ns'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map_dfc</a></span>(<span class='no'>feature_funs</span>, ~ <span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span>(<span class='fu'>.x</span>(<span class='no'>test_image</span>)))
-<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='no'>feature_df2</span>)</div><div class='output co'>#&gt; # A tibble: 6 x 10
+<span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='no'>feature_df2</span>)</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 6 x 10</span><span>
 #&gt;   gauss_filt_3 gauss_filt_5 DoG_filt_3 DoG_filt_5 var_filt_3 var_filt_5
-#&gt;          &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
-#&gt; 1        0.362        0.412    5.54e-9     0.0497     0.0982     0.0810
-#&gt; 2        0.433        0.538    1.86e-8     0.105      0.106      0.0780
-#&gt; 3        0.643        0.581   -1.18e-8    -0.0623     0.0743     0.0927
-#&gt; 4        0.343        0.395    7.19e-9     0.0516     0.0522     0.0854
-#&gt; 5        0.313        0.425    1.82e-8     0.112      0.0507     0.0690
-#&gt; 6        0.687        0.669   -2.85e-9    -0.0186     0.0558     0.0595
-#&gt; # … with 4 more variables: sobel_filt_3 &lt;dbl&gt;, sobel_filt_5 &lt;dbl&gt;,
-#&gt; #   c_hough_trans_11 &lt;dbl&gt;, c_hough_trans_21 &lt;dbl&gt;</div><div class='input'>
-</div></pre>
+#&gt;          </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>        </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
+#&gt; </span><span style='color: #555555;'>1</span><span>        0.362        0.412    5.54</span><span style='color: #555555;'>e</span><span style='color: #BB0000;'>-9</span><span>     0.049</span><span style='text-decoration: underline;'>7</span><span>     0.098</span><span style='text-decoration: underline;'>2</span><span>     0.081</span><span style='text-decoration: underline;'>0</span><span>
+#&gt; </span><span style='color: #555555;'>2</span><span>        0.433        0.538    1.86</span><span style='color: #555555;'>e</span><span style='color: #BB0000;'>-8</span><span>     0.105      0.106      0.078</span><span style='text-decoration: underline;'>0</span><span>
+#&gt; </span><span style='color: #555555;'>3</span><span>        0.643        0.581   -</span><span style='color: #BB0000;'>1.18</span><span style='color: #555555;'>e</span><span style='color: #BB0000;'>-8</span><span>    -</span><span style='color: #BB0000;'>0.062</span><span style='color: #BB0000;text-decoration: underline;'>3</span><span>     0.074</span><span style='text-decoration: underline;'>3</span><span>     0.092</span><span style='text-decoration: underline;'>7</span><span>
+#&gt; </span><span style='color: #555555;'>4</span><span>        0.343        0.395    7.19</span><span style='color: #555555;'>e</span><span style='color: #BB0000;'>-9</span><span>     0.051</span><span style='text-decoration: underline;'>6</span><span>     0.052</span><span style='text-decoration: underline;'>2</span><span>     0.085</span><span style='text-decoration: underline;'>4</span><span>
+#&gt; </span><span style='color: #555555;'>5</span><span>        0.313        0.425    1.82</span><span style='color: #555555;'>e</span><span style='color: #BB0000;'>-8</span><span>     0.112      0.050</span><span style='text-decoration: underline;'>7</span><span>     0.069</span><span style='text-decoration: underline;'>0</span><span>
+#&gt; </span><span style='color: #555555;'>6</span><span>        0.687        0.669   -</span><span style='color: #BB0000;'>2.85</span><span style='color: #555555;'>e</span><span style='color: #BB0000;'>-9</span><span>    -</span><span style='color: #BB0000;'>0.018</span><span style='color: #BB0000;text-decoration: underline;'>6</span><span>     0.055</span><span style='text-decoration: underline;'>8</span><span>     0.059</span><span style='text-decoration: underline;'>5</span><span>
+#&gt; </span><span style='color: #555555;'># … with 4 more variables: sobel_filt_3 </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, sobel_filt_5 </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>,
+#&gt; #   c_hough_11 </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, c_hough_21 </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span></div><div class='input'>
+</div></span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

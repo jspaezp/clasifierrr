@@ -32,14 +32,14 @@ We will start with the same files as the ones in the readme
 params_df <- tibble::tibble(
     file = c(
         system.file(
-            "extdata", "tiny_4T1-shNT-1_layer1.png",
+            "extdata", "4T1-shNT-1_layer1.png",
             package = "clasifierrr"),
         system.file(
-            "extdata", "tiny_4T1-shNT-1_layer2.png",
+            "extdata", "4T1-shNT-1_layer2.png",
             package = "clasifierrr")),
     classif = c("spheroid", "bg"),
     related_file = system.file(
-        "extdata", "tiny_4T1-shNT-1.png",
+        "extdata", "4T1-shNT-1.png",
         package = "clasifierrr")
 )
 
@@ -57,7 +57,7 @@ display(base_image, method = "raster")
 time_taken_full <- system.time({
     features <- calc_features(
         base_image, 
-        filter_widths = c(3,5), shape_sizes = c(51, 101))
+        filter_widths = c(3,5), shape_sizes = c(151, 301))
 })
 
 time_taken_full
@@ -82,7 +82,7 @@ shrunk_image <- resize(base_image, w = newsize)
 time_taken_shrunk <- system.time({
     shrunk_features <- calc_features(
         shrunk_image, 
-        filter_widths = c(3,5), shape_sizes = c(15, 31))
+        filter_widths = c(3,5), shape_sizes = c(71, 151))
 })
 
 time_taken_shrunk
@@ -142,7 +142,7 @@ multi_time_shrunk <- system.time({
         preprocess_fun_img = half_image,
         preprocess_fun_mask = half_image, 
         train_size_each = 5000, 
-        filter_widths = c(3,5), shape_sizes = c(15, 31))
+        filter_widths = c(3,5), shape_sizes = c(71, 151))
 })
 
 multi_time_full
@@ -180,7 +180,7 @@ multi_time_shrunk <- system.time({
         preprocess_fun_mask = half_image, 
         train_size_each = 1000, 
         filter_widths = c(3,5),
-        shape_sizes = c(15, 31))
+        shape_sizes = c(71, 151))
 })
 ```
 
@@ -195,13 +195,13 @@ for (i in 1:10) {
   features <- calc_features(
     base_image, 
     filter_widths = c(3,5,7,11,15),
-    shape_sizes = c(15, 31))
+    shape_sizes = c(71, 151))
 }})
 
 fft_image <- fftwtools::fftw2d(base_image)
 precompiled_filters <- compile_calc_features(
   c(3,5,7,11,15),
-  shape_sizes = c(15, 31),
+  shape_sizes = c(71, 151),
   dim(base_image))
 
 system.time({
@@ -233,7 +233,7 @@ plan(multiprocess, workers = 2)
 features <- calc_features(
   base_image, 
   filter_widths = c(3,5,7,11,15),
-  shape_sizes = c(15, 31))
+  shape_sizes = c(71, 151))
 
 ```
 

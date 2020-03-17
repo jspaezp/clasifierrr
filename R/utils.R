@@ -13,6 +13,7 @@
 #' @export
 #'
 #' @examples
+#' make_odd(1:20)
 make_odd <- function(num) {
     num <- as.integer(num)
     num <- num + ((num + 1) %% 2)

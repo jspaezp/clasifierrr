@@ -203,10 +203,11 @@ build_train <- function(feat_img, pixel_classes, train_size = 50000) {
 #' @param train_size_each number of elements to keep for each mask/image combination
 #' @param preprocess_fun_img optional, processing function to be applied to each image
 #' @param preprocess_fun_mask optional, processing function to be applied to each mask
-#' @param filter_widths numeric vector with the filter widths to be used
+#' @param ... additional arguments passed to `calc_features`
 #'
 #' @return data.frame
 #' @export
+#' @seealso
 #'
 #' @examples
 #' params_df <- tibble::tibble(
@@ -230,9 +231,7 @@ build_train_multi <- function(imgs_df,
                               train_size_each = 50000,
                               preprocess_fun_img = NULL,
                               preprocess_fun_mask = NULL,
-                              filter_widths = c(3, 5, 15, 31),
-                              shape_sizes = c(25, 51)
-                              ) {
+                              ...) {
 
     if (is.null(preprocess_fun_mask)) {
         preprocess_fun_mask = (function(x){x})
@@ -246,13 +245,17 @@ build_train_multi <- function(imgs_df,
         imgs_df,
         preprocess_fun_mask = preprocess_fun_mask)
 
+    feat_imgs <- purrr::map(
+        .x = names(classes_list),
+        function(.x, ...) { calc_features(
+            preprocess_fun_img(readImageBw(.x)),
+            ...) },
+        ...)
+
     trainset <- purrr::map2_df(
-        names(classes_list), classes_list,
+        feat_imgs, classes_list,
         ~ build_train(
-          feat_img = calc_features(
-              preprocess_fun_img(readImageBw(.x)),
-              filter_widths = filter_widths,
-              shape_sizes = shape_sizes),
+          feat_img = .x,
           pixel_classes = .y,
           train_size = train_size_each)
     )

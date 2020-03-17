@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">clasifierrr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
       </span>
     </div>
 
@@ -120,12 +120,14 @@
 <a class="sourceLine" id="cb3-19" title="19"><span class="co">#&gt; 6        0.490         0.397         0.387   -3.76e-9     -0.0777     -0.0321</span></a>
 <a class="sourceLine" id="cb3-20" title="20"><span class="co">#&gt; # … with 10 more variables: var_filt_3 &lt;dbl&gt;, var_filt_15 &lt;dbl&gt;,</span></a>
 <a class="sourceLine" id="cb3-21" title="21"><span class="co">#&gt; #   var_filt_31 &lt;dbl&gt;, sobel_filt_3 &lt;dbl&gt;, sobel_filt_15 &lt;dbl&gt;,</span></a>
-<a class="sourceLine" id="cb3-22" title="22"><span class="co">#&gt; #   sobel_filt_31 &lt;dbl&gt;, c_hough_trans_101 &lt;dbl&gt;, c_hough_trans_201 &lt;dbl&gt;,</span></a>
-<a class="sourceLine" id="cb3-23" title="23"><span class="co">#&gt; #   c_hough_trans_301 &lt;dbl&gt;, c_hough_trans_551 &lt;dbl&gt;</span></a></code></pre></div>
+<a class="sourceLine" id="cb3-22" title="22"><span class="co">#&gt; #   sobel_filt_31 &lt;dbl&gt;, c_hough_101 &lt;dbl&gt;, c_hough_201 &lt;dbl&gt;,</span></a>
+<a class="sourceLine" id="cb3-23" title="23"><span class="co">#&gt; #   c_hough_301 &lt;dbl&gt;, c_hough_551 &lt;dbl&gt;</span></a></code></pre></div>
 <p>you can see the features that were calculated by using the following function</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw"><a href="../reference/display_filters.html">display_filters</a></span>(feature_df, <span class="dt">dims =</span> <span class="kw"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(base_image))</a></code></pre></div>
 <p><img src="features_files/figure-html/unnamed-chunk-4-1.png" width="1152"></p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw"><a href="../reference/display_filters.html">display_filters</a></span>(feature_df, <span class="dt">dims =</span> <span class="kw"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(base_image), <span class="dt">scale =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw"><a href="../reference/display_filters.html">display_filters</a></span>(feature_df, <span class="dt">dims =</span> <span class="kw"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(base_image), <span class="dt">scale =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="co">#&gt; Warning in .local(object, ...): frame 1 cannot be normalized as its diff(range)</span></a>
+<a class="sourceLine" id="cb5-3" title="3"><span class="co">#&gt; is 0</span></a></code></pre></div>
 <p><img src="features_files/figure-html/unnamed-chunk-4-2.png" width="1152"></p>
   </div>
 

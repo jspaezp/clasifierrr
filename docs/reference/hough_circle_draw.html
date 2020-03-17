@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">clasifierrr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
       </span>
     </div>
 
@@ -166,13 +166,13 @@ draw the circles (defaults to 0.95, anyting 95<!-- % of the highest -->
 intensity)</p></td>
     </tr>
     <tr>
-      <th>img</th>
-      <td><p>image to transform</p></td>
-    </tr>
-    <tr>
-      <th>blurra</th>
+      <th>blurr</th>
       <td><p>numeric value indicating the ratio of the width to blurr,
 1 means have the blurr be the same as the circle width</p></td>
+    </tr>
+    <tr>
+      <th>img</th>
+      <td><p>image to transform</p></td>
     </tr>
     </table>
 
@@ -191,7 +191,8 @@ intensity)</p></td>
 <code><a href='circular_hough_transform.html'>circular_hough_transform</a>()</code>,
 <code><a href='sobel_filter.html'>compile_sobel_filter</a>()</code>,
 <code><a href='variance_filter.html'>compile_variance_filter</a>()</code>,
-<code><a href='dog_filter.html'>dog_filter</a>()</code></p></div>
+<code><a href='dog_filter.html'>dog_filter</a>()</code>,
+<code><a href='hough_circles_max.html'>hough_circles_max</a>()</code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='no'>x</span> <span class='kw'>=</span> <span class='fu'>readImage</span>(<span class='fu'><a href='https://rdrr.io/r/base/system.file.html'>system.file</a></span>(<span class='st'>'images'</span>, <span class='st'>'shapes.png'</span>, <span class='kw'>package</span><span class='kw'>=</span><span class='st'>'EBImage'</span>))</div><div class='output co'>#&gt; <span class='error'>Error in readImage(system.file("images", "shapes.png", package = "EBImage")): could not find function "readImage"</span></div><div class='input'><span class='no'>hough</span> <span class='kw'>&lt;-</span> <span class='fu'>hough_circle_draw</span>(<span class='no'>x</span>, <span class='fl'>51</span>, <span class='fl'>3</span>, <span class='fl'>3</span>)</div><div class='output co'>#&gt; <span class='error'>Error in EBImage::medianFilter(img, 3): object 'x' not found</span></div><div class='input'><span class='co'># display(hough)</span>

@@ -32,10 +32,10 @@ hough_circle_draw(
 draw the circles (defaults to 0.95, anyting 95% of the highest
 intensity)}
 
-\item{img}{image to transform}
-
-\item{blurra}{numeric value indicating the ratio of the width to blurr,
+\item{blurr}{numeric value indicating the ratio of the width to blurr,
 1 means have the blurr be the same as the circle width}
+
+\item{img}{image to transform}
 }
 \value{
 image
@@ -63,6 +63,7 @@ Other filters:
 \code{\link{circular_hough_transform}()},
 \code{\link{compile_sobel_filter}()},
 \code{\link{compile_variance_filter}()},
-\code{\link{dog_filter}()}
+\code{\link{dog_filter}()},
+\code{\link{hough_circles_max}()}
 }
 \concept{filters}

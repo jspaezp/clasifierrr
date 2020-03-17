@@ -23,7 +23,7 @@ Displays the data from a feature frame
 myfile <- system.file("extdata", "4T1-shNT-1.png", package = "clasifierrr")
 myimg <- readImageBw(myfile)
 myfeat <- calc_features(myimg, c(3,5), shape_sizes = c(51, 501))
-display_filters(myfeat, dim(myimg))
+display_filters(myfeat, dim(myimg), scale = TRUE)
 }
 \seealso{
 calc_features

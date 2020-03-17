@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">clasifierrr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.5.0</span>
       </span>
     </div>
 
@@ -135,8 +135,7 @@
   <span class='kw'>train_size_each</span> <span class='kw'>=</span> <span class='fl'>50000</span>,
   <span class='kw'>preprocess_fun_img</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
   <span class='kw'>preprocess_fun_mask</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>, <span class='fl'>5</span>, <span class='fl'>15</span>, <span class='fl'>31</span>),
-  <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>51</span>, <span class='fl'>101</span>, <span class='fl'>151</span>, <span class='fl'>201</span>, <span class='fl'>251</span>)
+  <span class='no'>...</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -159,14 +158,19 @@
       <td><p>optional, processing function to be applied to each mask</p></td>
     </tr>
     <tr>
-      <th>filter_widths</th>
-      <td><p>numeric vector with the filter widths to be used</p></td>
+      <th>...</th>
+      <td><p>additional arguments passed to `calc_features`</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>data.frame</p>
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'>
+
+</div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='no'>params_df</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>tibble</span><span class='kw ns'>::</span><span class='fu'><a href='https://tibble.tidyverse.org/reference/tibble.html'>tibble</a></span>(
@@ -185,7 +189,7 @@
 <span class='no'>trainset</span> <span class='kw'>&lt;-</span> <span class='fu'>build_train_multi</span>(
     <span class='no'>params_df</span>,
     <span class='kw'>train_size_each</span> <span class='kw'>=</span> <span class='fl'>5000</span>,
-    <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>,<span class='fl'>5</span>), <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>21</span>, <span class='fl'>51</span>))</div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 8556 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/Rtmpj1ueSh/temp_libpath734f364a36a4/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 14056 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Classified objects are of classes {bg: 3069} and {spheroid: 1931}</span>
+    <span class='kw'>filter_widths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>,<span class='fl'>5</span>), <span class='kw'>shape_sizes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>21</span>, <span class='fl'>51</span>))</div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/RtmpBTft1o/temp_libpath5ca52463102f/clasifierrr/extdata/tiny_4T1-shNT-1_layer1.png and classification" spheroid " a total of { 8556 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Returning for file:  /tmp/RtmpBTft1o/temp_libpath5ca52463102f/clasifierrr/extdata/tiny_4T1-shNT-1_layer2.png and classification" bg " a total of { 14056 } positive pixels</span></div><div class='output co'>#&gt; <span class='message'>Classified objects are of classes {bg: 3069} and {spheroid: 1931}</span>
 #&gt; <span class='message'></span></div><div class='output co'>#&gt; <span class='message'>Returning a data frame of 5000 rows and 11 columns</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
@@ -193,6 +197,7 @@
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
+      <li><a href="#see-also">See also</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>
 

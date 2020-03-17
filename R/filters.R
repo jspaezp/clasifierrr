@@ -404,8 +404,7 @@ pane_circ_hough <- function(img, diameters, sobel_width, tolerance) {
     pp_img <- circular_hough_preprocess(img, sobel_width)
     # fft_img <- fftwtools::fftw2d(img)
 
-    diameters <- as.integer(diameters)
-    diameters[diameters %% 2 == 0] <- diameters[diameters %% 2 == 0] + 1
+    diameters <- make_odd(diameters)
     imgs <- purrr::map(
         diameters,
         ~ circular_hough_postprocess(pp_img, .x, tolerance))
@@ -437,8 +436,7 @@ hough_circles_max <- function(img,
                               sobel_width = 5,
                               tolerance = 21) {
 
-    diameters <- as.integer(diameters)
-    diameters[diameters %% 2 == 0] <- diameters[diameters %% 2 == 0] + 1
+    diameters <- make_odd(diameters)
     diameters <- sort(diameters)
 
 
